@@ -1,5 +1,7 @@
-package org;
+package org.DAO;
 //Defines the database operations (CRUD methods) that must be implemented for Customer.
+import org.DTO.Customer;
+
 import java.util.List;
 import java.util.Optional;
 

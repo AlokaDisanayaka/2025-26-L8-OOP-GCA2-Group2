@@ -1,4 +1,4 @@
-package org;
+package org.DTO;
 //Represents a Customer object and stores validated customer data (id, name, email, phone)
 public class Customer {
     private int customerId;

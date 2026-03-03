@@ -1,4 +1,8 @@
-package org;
+package org.DAO_JDBC;
+
+import org.DAO.CustomerDao;
+import org.DB.DBConnection;
+import org.DTO.Customer;
 
 import java.sql.*;
 import java.util.ArrayList;

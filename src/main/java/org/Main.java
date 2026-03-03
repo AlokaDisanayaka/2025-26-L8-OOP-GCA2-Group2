@@ -1,4 +1,8 @@
 package org;
+import org.DAO.CustomerDao;
+import org.DAO_JDBC.JdbcCustomerDao;
+import org.DTO.Customer;
+import org.Services.CustomerService;
 
 public class Main {
     public static void main(String[] args) {
