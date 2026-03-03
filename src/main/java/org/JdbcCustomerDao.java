@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+//Implements the CustomerDao interface using JDBC and SQL with PreparedStatements
 public class JdbcCustomerDao implements CustomerDao {
 
     @Override

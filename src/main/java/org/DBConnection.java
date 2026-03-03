@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+//Creates and returns a database connection using the JDBC URL, username, and password.
 public class DBConnection {
 
   private static final String URL = "jdbc:mysql://localhost:3306/shopspheredb?useSSL=false&serverTimezone=UTC";

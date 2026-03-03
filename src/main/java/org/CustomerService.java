@@ -2,7 +2,7 @@ package org;
 
 import java.util.List;
 import java.util.Optional;
-
+//Acts as a middle layer between the app and DAO; calls DAO methods without knowing how the database works
 public class CustomerService {
 
     private final CustomerDao customerDao;

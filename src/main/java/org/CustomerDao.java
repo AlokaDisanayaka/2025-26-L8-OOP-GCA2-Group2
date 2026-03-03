@@ -1,5 +1,5 @@
 package org;
-
+//Defines the database operations (CRUD methods) that must be implemented for Customer.
 import java.util.List;
 import java.util.Optional;
 
