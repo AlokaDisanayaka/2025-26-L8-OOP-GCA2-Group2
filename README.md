@@ -46,7 +46,7 @@ Our project is an Online Shop Order Management System which models a real e-comm
    - Each table has at least 10 rows.
 
 ### 2.2 Configure credentials
-  - `db.url=jdbc:mysql://localhost:3306/gca2_db`
+  - `db.url=jdbc:mysql://localhost:3306/shopspheredb?useSSL=false&serverTimezone=UTC`
   - `db.user=...`
   - `db.password=...`
 
