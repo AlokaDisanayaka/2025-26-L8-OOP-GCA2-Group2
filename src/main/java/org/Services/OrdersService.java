@@ -6,6 +6,9 @@ import org.DTO.Orders;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 public class OrdersService
 {
     private final OrdersDao ordersDao;
@@ -43,5 +46,14 @@ public class OrdersService
     public boolean deleteOrder(int id)
     {
         return ordersDao.deleteOrderById(id);
+    }
+
+    //Filter with Predicate
+    public List<Orders> findOrdersByFilter(Predicate<Orders> filter)
+    {
+        return ordersDao.getAllOrders()
+        .stream()
+        .filter(filter)
+        .collect(Collectors.toList());
     }
 }
