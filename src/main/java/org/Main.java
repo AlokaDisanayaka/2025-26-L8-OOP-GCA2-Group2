@@ -23,15 +23,28 @@ public class Main {
         CustomerDao customerDao = new JdbcCustomerDao();
         CustomerService customerService = new CustomerService(customerDao);
 
-        // test ...
-        Customer newCustomer = new Customer("Test User", "testuser@email.com", "0871234567");
+        // test customer ...
+
+        //test add customer
+        Customer newCustomer = new Customer("Test User1", "test1user@email.com", "0871234567");
         Customer inserted = customerService.addCustomer(newCustomer);
-
+        //test getCustomerID
         System.out.println("Inserted customer id = " + inserted.getCustomerId());
+        //test getAllCustomers
         System.out.println("Total customers = " + customerService.getAllCustomers().size());
+        //test getCustomerById
+        System.out.println("Customer with cus_Id 2: "+customerService.getCustomerById(2));
+        //test updateCustomer
+        Customer updatedCustomer=new Customer("Anna Murphy", "anna@gmail.com","0875689654");
+        System.out.println("Updating the details of the customer with customer Id=>1"+customerService.updateCustomer(1,updatedCustomer));
+        //test delete customer
+        System.out.println("Deleting the customer with customer Id=> 6"+customerService.deleteCustomer(6));
 
 
-        //Test Orders and OrderItem
+
+
+        //Test Orders and OrderItem....
+
         OrdersDao ordersDao = new JdbcOrdersDao();
         OrdersService ordersService = new OrdersService(ordersDao);
 
