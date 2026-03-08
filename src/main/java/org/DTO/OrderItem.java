@@ -24,6 +24,9 @@ public class OrderItem
         setQuantity(quantity);
         setUnitPriceAtTime(unitPriceAtTime);
     }
+    public OrderItem()
+    {
+    }
 
     //Getters and Setters
     public int getOrderItemId()

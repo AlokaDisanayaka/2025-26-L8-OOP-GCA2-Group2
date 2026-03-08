@@ -25,6 +25,9 @@ public class Orders
         setOrderDate(orderDate);
         setStatus(status);
     }
+    public Orders()
+    {
+    }
 
     //Getters and Setters
     public int getOrderId()
