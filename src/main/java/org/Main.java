@@ -2,6 +2,7 @@ package org;
 import org.DAO.CustomerDao;
 import org.DAO_JDBC.JdbcCustomerDao;
 import org.DTO.Customer;
+import org.JsonUtil.CustomerJsonUtil;
 import org.Services.CustomerService;
 
 import org.DAO.ProductDao;
@@ -34,7 +35,8 @@ public class Main {
         // ----------------------------------------------------
         // TEST CUSTOMER
         // ----------------------------------------------------
-        System.out.println(" CUSTOMER TESTS................");
+        System.out.println(" CUSTOMER TESTS");
+        System.out.println("---------------------------------------------------");
 
         // 1. INSERT CUSTOMER
         System.out.println("\nINSERT CUSTOMER");
@@ -153,6 +155,35 @@ public class Main {
             );
         }
 
+        // CUSTOMER JSON TESTS
+
+        System.out.println("\n\n CUSTOMER JSON TESTS");
+
+
+        // Create a sample customer object
+        Customer customer = new Customer(1, "Gia Jordan", "gg1@email.com", "0851111111");
+
+        // Convert Customer object to JSON
+        String customerJson = CustomerJsonUtil.customerToJson(customer);
+        System.out.println("\nCustomer object converted to JSON:");
+        System.out.println(customerJson);
+
+        // Convert JSON back to Customer object
+        Customer customerFromJson = CustomerJsonUtil.customerFromJson(customerJson);
+        System.out.println("\nJSON converted back to Customer object:");
+        System.out.println("ID: " + customerFromJson.getCustomerId());
+        System.out.println("Name: " + customerFromJson.getName());
+        System.out.println("Email: " + customerFromJson.getEmail());
+        System.out.println("Phone: " + customerFromJson.getPhone());
+
+        // Get all customers from database
+        List<Customer> customerList = customerService.getAllCustomers();
+
+        // Convert list of customers to JSON
+        String customerListJson = CustomerJsonUtil.customerListToJson(customerList);
+        System.out.println("\nCustomer list converted to JSON:");
+        System.out.println(customerListJson);
+
 
         //--------------------------------------------------------------------
         // TEST PRODUCT
@@ -160,6 +191,7 @@ public class Main {
 
 
         System.out.println("\n\nPRODUCT TESTS................");
+        System.out.println("--------------------------------------------------");
 
 
         // 1. INSERT PRODUCT
