@@ -30,30 +30,106 @@ public class Main {
         CustomerDao customerDao = new JdbcCustomerDao();
         CustomerService customerService = new CustomerService(customerDao);
 
-        // test customer ...
 
-        //test add customer
-        Customer newCustomer = new Customer("Test User1", "test1user@email.com", "0871234567");
-        Customer inserted = customerService.addCustomer(newCustomer);
-        //test getCustomerID
-        System.out.println("Inserted customer id = " + inserted.getCustomerId());
-        //test getAllCustomers
-        System.out.println("Total customers = " + customerService.getAllCustomers().size());
-        //test getCustomerById
-        System.out.println("Customer with cus_Id 2: "+customerService.getCustomerById(2));
-        //test updateCustomer
-        Customer updatedCustomer=new Customer("Anna Murphy", "anna@gmail.com","0875689654");
-        System.out.println("Updating the details of the customer with customer Id=>1"+customerService.updateCustomer(1,updatedCustomer));
-        //test delete customer
-        System.out.println("Deleting the customer with customer Id=> 6"+customerService.deleteCustomer(6));
+        // ----------------------------------------------------
+        // TEST CUSTOMER
+        // ----------------------------------------------------
+        System.out.println(" CUSTOMER TESTS................");
+
+        // 1. INSERT CUSTOMER
+        System.out.println("\nINSERT CUSTOMER");
+
+        Customer newCustomer = new Customer("Test Customer", "testcustomer@email.com", "0871234567");
+        Customer insertedCustomer = customerService.addCustomer(newCustomer);
+
+        System.out.println("Inserted customer:");
+        System.out.println("ID: " + insertedCustomer.getCustomerId());
+        System.out.println("Name: " + insertedCustomer.getName());
+        System.out.println("Email: " + insertedCustomer.getEmail());
+        System.out.println("Phone: " + insertedCustomer.getPhone());
+
+        int customerTestId = insertedCustomer.getCustomerId();
+
+        // 2. GET ALL CUSTOMERS
+        System.out.println("\nGET ALL CUSTOMERS");
+
+        List<Customer> allCustomers = customerService.getAllCustomers();
+
+        for (int i=0;i< allCustomers.size();i++)
+        {
+            Customer c=allCustomers.get(i);
+            System.out.println(
+                    c.getCustomerId() + " | " +
+                            c.getName() + " | " +
+                            c.getEmail() + " | " +
+                            c.getPhone()
+            );
+        }
+
+        // 3. GET CUSTOMER BY ID
+        System.out.println("\nGET CUSTOMER BY ID ");
+
+        Optional<Customer> foundCustomer = customerService.getCustomerById(customerTestId);
+
+        if (foundCustomer.isPresent()) {
+            Customer c = foundCustomer.get();
+            System.out.println("Customer found:");
+            System.out.println("ID: " + c.getCustomerId());
+            System.out.println("Name: " + c.getName());
+            System.out.println("Email: " + c.getEmail());
+            System.out.println("Phone: " + c.getPhone());
+        } else {
+            System.out.println("Customer not found.");
+        }
+
+        // 4. UPDATE CUSTOMER
+        System.out.println("\nUPDATE CUSTOMER ");
+
+        Customer updatedCustomerData = new Customer("Updated Customer", "updatedcustomer@email.com", "0899999999");
+        Customer updatedCustomer = customerService.updateCustomer(customerTestId, updatedCustomerData);
+
+        System.out.println("Updated customer:");
+        System.out.println("ID: " + updatedCustomer.getCustomerId());
+        System.out.println("Name: " + updatedCustomer.getName());
+        System.out.println("Email: " + updatedCustomer.getEmail());
+        System.out.println("Phone: " + updatedCustomer.getPhone());
+
+        // 5. DELETE CUSTOMER
+        System.out.println("\nDELETE CUSTOMER");
+
+        boolean customerDeleted = customerService.deleteCustomer(customerTestId);
+
+        if (customerDeleted) {
+            System.out.println("Customer deleted successfully.");
+        } else {
+            System.out.println("Customer was not deleted.");
+        }
+
+        // 6. CHECK IF CUSTOMER STILL EXISTS
+        System.out.println("\nCHECK IF CUSTOMER STILL EXISTS");
+
+        Optional<Customer> deletedCustomerCheck = customerService.getCustomerById(customerTestId);
+
+        if (deletedCustomerCheck.isPresent()) {
+            System.out.println("Customer still exists.");
+        } else {
+            System.out.println("Customer no longer exists.");
+        }
 
 
-        //test product......
+
+        //--------------------------------------------------------------------
+        // TEST PRODUCT
+        //--------------------------------------------------------------------
+
+
+        System.out.println("\n\nPRODUCT TESTS................");
+
+
+        // 1. INSERT PRODUCT
+        System.out.println("\nINSERT PRODUCT ");
         ProductDao productDao = new JdbcProductDao();
         ProductService productService = new ProductService(productDao);
-
-        //testing insertProduct
-        System.out.println("Insert product");
 
         Product newProduct = new Product("Test Keyboard", 45.99, 12, true);
         Product insertedProduct = productService.addProduct(newProduct);
@@ -68,8 +144,8 @@ public class Main {
 
         System.out.println();
 
-        //testing getAllProducts
-        System.out.println("Get all products");
+        //2.HET ALL PRODUCTS
+        System.out.println("\nGET ALL PRODUCTS");
 
         List<Product> allProducts = productService.getAllProducts();
 
@@ -87,8 +163,8 @@ public class Main {
 
         System.out.println();
 
-        //testing getProductByID
-        System.out.println("Get product ID");
+        //3.GET PRODUCT BY id
+        System.out.println("\nGET PRODUCT BY ID");
 
         Optional<Product> foundProduct = productService.getProductById(testId);
 
@@ -109,8 +185,8 @@ public class Main {
 
         System.out.println();
 
-        //testing updateProduct
-        System.out.println("Update product");
+       //4.UPDATE PRODUCT
+        System.out.println("\nUPDATE PRODUCT");
 
         Product updatedData = new Product("Updated Keyboard", 55.99, 20, true);
         Product updatedProduct = productService.updateProduct(testId, updatedData);
@@ -124,8 +200,8 @@ public class Main {
 
         System.out.println();
 
-        //testing deleteProduct
-        System.out.println("Delete product");
+        //5.DELETE PRODUCT
+        System.out.println("DELETE PRODUCT");
 
         boolean deleted = productService.deleteProduct(testId);
 
@@ -140,8 +216,8 @@ public class Main {
 
         System.out.println();
 
-      //Check if the product is deleted
-        System.out.println("=== CHECK IF PRODUCT STILL EXISTS ===");
+      //CHECK IF THE PRODUCT IS DELETED
+        System.out.println("CHECK IF PRODUCT STILL EXISTS");
 
         Optional<Product> deletedCheck = productService.getProductById(testId);
 
@@ -153,7 +229,9 @@ public class Main {
 
 
 
-        //Test Orders and OrderItem....
+       //------------------------------------------------------------------
+        // TEST ORDER AND ORDER ITEMS
+        //-----------------------------------------------------------------
 
         OrdersDao ordersDao = new JdbcOrdersDao();
         OrdersService ordersService = new OrdersService(ordersDao);
