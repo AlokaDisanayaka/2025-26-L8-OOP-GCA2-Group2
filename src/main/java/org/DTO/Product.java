@@ -13,17 +13,24 @@ public class Product {
                    int stockQty, boolean isActive)
     {
 
-        setProductId(productId);
-        setProductName(productName);
-        setUnitPrice(unitPrice);
-        setStockQty(stockQty);
-        setActive(isActive);
+        this.productId=productId;
+        this.productName=productName;
+        this.unitPrice=unitPrice;
+        this.stockQty=stockQty;
+        this.isActive=isActive;
+    }
+    public Product ()
+    {
+
     }
     public Product(String productName, double unitPrice,
                    int stockQty, boolean isActive)
     {
-
-        this(0, productName, unitPrice, stockQty, isActive);
+          this.productId=0;
+          this.productName=productName;
+          this.unitPrice=unitPrice;
+          this.stockQty=stockQty;
+          this.isActive=isActive;
     }
 
     // Getters and Setters with simple validation
