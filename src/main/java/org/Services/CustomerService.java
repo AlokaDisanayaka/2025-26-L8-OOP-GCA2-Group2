@@ -5,6 +5,8 @@ import org.DTO.Customer;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+
 //Acts as a middle layer between the app and DAO; calls DAO methods without knowing how the database works
 public class CustomerService {
 
@@ -38,5 +40,11 @@ public class CustomerService {
     public boolean deleteCustomer(int id)
     {
         return customerDao.deleteCustomerById(id);
+    }
+
+    //filter customers using a Predicate
+    public List<Customer> findCustomersByFilter(Predicate<Customer> filter)
+    {
+        return customerDao.findCustomersByFilter(filter);
     }
 }
