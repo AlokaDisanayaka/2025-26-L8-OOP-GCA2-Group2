@@ -257,10 +257,52 @@ public class Main {
 
         Optional<Product> deletedCheck = productService.getProductById(testId);
 
-        if (deletedCheck.isPresent()) {
+        if (deletedCheck.isPresent())
+        {
             System.out.println("Product still exists.");
-        } else {
+        }
+        else
+        {
             System.out.println("Product no longer exists.");
+        }
+
+
+      // PRODUCT FILTER TESTS
+
+        System.out.println("\nFILTER PRODUCTS WITH PRICE GREATER THAN 100 (>100)");
+
+        List<Product> expensiveProducts = productService.findProductsByFilter(
+                product -> product.getUnitPrice() > 100
+        );
+
+        for (int i =0;i<expensiveProducts.size();i++)
+        {
+            Product p = expensiveProducts.get(i);
+            System.out.println(
+                    p.getProductId() + " | " +
+                            p.getProductName() + " | " +
+                            p.getUnitPrice() + " | " +
+                            p.getStockQty() + " | " +
+                            p.isActive()
+            );
+        }
+
+        System.out.println("\nFILTER PRODUCTS WITH STOCK LESS THAN 15 (<15)");
+
+        List<Product> lowStockProducts = productService.findProductsByFilter(
+                product -> product.getStockQty() < 15
+        );
+
+        for (int i=0;i< lowStockProducts.size();i++)
+        {
+            Product p= lowStockProducts.get(i);
+            System.out.println(
+                    p.getProductId() + " | " +
+                            p.getProductName() + " | " +
+                            p.getUnitPrice() + " | " +
+                            p.getStockQty() + " | " +
+                            p.isActive()
+            );
         }
 
 
