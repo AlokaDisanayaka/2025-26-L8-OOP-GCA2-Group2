@@ -21,12 +21,21 @@ Our project is an Online Shop Order Management System which models a real e-comm
   - Adhira Pillai — `D00277397`
   - Victoria Olabode — `D00279232`
 
-### Key features
-- JDBC DAO layer with full CRUD (Stage 1 foundation)
-- Client–server (sockets) JSON protocol + `ServerResponse<T>` wrapper
-- Multithreaded server using `ExecutorService`
-- Binary file upload + retrieval stored as DB BLOB with metadata
-- JUnit 5 test suite with ≥70% line coverage evidence at final stage
+### Key features (Stage 1)
+-DTO classes with encapsulated validated fields for each entity
+-DAO layer implemented using the JDBC API and PreparedStatements
+-Full CRUD operations for Customer and Product
+-Predicate-based filtering for flexible querying
+-JSON serialization and deserialization using Jackson
+-Round-trip JSON conversion testing
+-MySQL relational database with normalized schema
+-Architecture diagram showing Client → Server → DAO → Database
+
+Future stages will extend the system with:
+- a multithreaded client–server architecture
+- JSON communication protocol
+- binary file storage using BLOBs
+- automated testing using JUnit
 
 ---
 
@@ -49,29 +58,90 @@ Our project is an Online Shop Order Management System which models a real e-comm
   - `db.url=jdbc:mysql://localhost:3306/shopspheredb?useSSL=false&serverTimezone=UTC`
   - `db.user=...`
   - `db.password=...`
+  - 
+### 2.3 Run the application (Stage 1 testing)
 
-### 2.3 Run the server
-- Main class: `server.ServerMain`
-- Default port: `5000` 
-- Expected output:
-  - “Server listening on …”
-  - Logs for client connect/disconnect
+Main class: app.Main
 
-### 2.4 Run the client(s)
-- Main class: `client.ClientMain`
-- Run **two clients simultaneously** for Stage 2+ demonstration.
+This class is used to test:
+- DAO CRUD operations
+- Predicate filtering
+- JSON conversion
 
 ---
+## 3.DAO Layer Overview 
+-The DAO layer separates database access from business logic. Each entity has a corresponding DAO interface and a JDBC implementation class.
 
-## 3. Architecture Summary
+CustomerDao -> JdbcCustomerDao
+ProductDao -> JdbcProductDao
+OrderDao -> JbbcOrderDao
+OrderItemDao -> JbdcOrderItemDao
 
-### 3.1 N-tier overview
+-The service layer depends only on the DAO interface, allowing the underlying database implementation to be changed without affecting the business logic.
+
+-All SQL statements use PreparedStatement to prevent SQL injection and follow the project requirements.
+
+## 4. JSON Conversion
+
+-Jackson’s ObjectMapper is used to convert DTO objects to and from JSON.
+
+-Implemented methods:
+customerToJson(Customer)
+customerFromJson(String json)
+customerListToJson(List<Customer>)
+
+productToJson(Product)
+productFromJson(String json)
+productListToJson(List<Product>)
+
+-Round-trip testing ensures that objects can be converted to JSON and reconstructed without data loss.
+
+## 5. DTO Structure 
+
+```
+org
+ ├── DTO
+ │     Customer.java
+ │     Product.java
+ │     Orders.java
+ │     OrderItem.java
+ │
+ ├── DAO
+ │     CustomerDao.java
+ │     ProductDao.java
+ │     OrdersDao.java
+ │     OrderItemDao.java
+ │
+ ├── DAO_JDBC
+ │     JdbcCustomerDao.java
+ │     JdbcProductDao.java
+ │     JdbcOrdersDao.java
+ │     JdbcOrderItemDao.java
+ │
+ ├── Services
+ │     CustomerService.java
+ │     ProductService.java
+ │     OrdersService.java
+ │     OrderItemService.java
+ │
+ ├── JsonUtil
+ │     CustomerJsonUtil.java
+ │     ProductJsonUtil.java
+ │     OrdersJsonUtil.java
+ │     OrderItemJsonUtil.java
+ │
+ └── DB
+       DBConnection.java
+```
+## 6. Architecture Summary
+
+### 6.1 N-tier overview
 - Client (UI / console)
-- Server (socket listener + request handlers + threading)
+- Server (planned for Stage 2 – socket listener + request handlers)
 - DAO layer (interfaces + JDBC implementations)
 - Database (MySQL)
 
-### 3.2 Architecture diagram
+### 6.2 Architecture diagram
 - Path: `docs/architecture.md`
 - Diagram format: Mermaid
   
