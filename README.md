@@ -69,32 +69,32 @@ This class is used to test:
 - JSON conversion
 
 ---
-## 3.DAO Layer Overview 
--The DAO layer separates database access from business logic. Each entity has a corresponding DAO interface and a JDBC implementation class.
+## 3. DAO Layer Overview 
+The DAO layer separates database access from business logic. Each entity has a corresponding DAO interface and a JDBC implementation class.
 
-CustomerDao -> JdbcCustomerDao
-ProductDao -> JdbcProductDao
-OrderDao -> JbbcOrderDao
-OrderItemDao -> JbdcOrderItemDao
+-CustomerDao -> JdbcCustomerDao
+-ProductDao -> JdbcProductDao
+-OrderDao -> JbbcOrderDao
+-OrderItemDao -> JbdcOrderItemDao
 
--The service layer depends only on the DAO interface, allowing the underlying database implementation to be changed without affecting the business logic.
+The service layer depends only on the DAO interface, allowing the underlying database implementation to be changed without affecting the business logic.
 
--All SQL statements use PreparedStatement to prevent SQL injection and follow the project requirements.
+All SQL statements use PreparedStatement to prevent SQL injection and follow the project requirements.
 
 ## 4. JSON Conversion
 
--Jackson’s ObjectMapper is used to convert DTO objects to and from JSON.
+Jackson’s ObjectMapper is used to convert DTO objects to and from JSON.
 
--Implemented methods:
-customerToJson(Customer)
-customerFromJson(String json)
-customerListToJson(List<Customer>)
+Implemented methods:
+-customerToJson(Customer)
+-customerFromJson(String json)
+-customerListToJson(List<Customer>)
 
-productToJson(Product)
-productFromJson(String json)
-productListToJson(List<Product>)
+-productToJson(Product)
+-productFromJson(String json)
+-productListToJson(List<Product>)
 
--Round-trip testing ensures that objects can be converted to JSON and reconstructed without data loss.
+Round-trip testing ensures that objects can be converted to JSON and reconstructed without data loss.
 
 ## 5. DTO Structure 
 
