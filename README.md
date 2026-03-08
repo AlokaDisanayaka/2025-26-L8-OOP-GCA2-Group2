@@ -21,7 +21,7 @@ Our project is an Online Shop Order Management System which models a real e-comm
   - Adhira Pillai — `D00277397`
   - Victoria Olabode — `D00279232`
 
-### Key features (Stage 1)
+### Key features (Stage 1 Implemented)
 -DTO classes with encapsulated validated fields for each entity
 -DAO layer implemented using the JDBC API and PreparedStatements
 -Full CRUD operations for Customer and Product
@@ -72,10 +72,10 @@ This class is used to test:
 ## 3. DAO Layer Overview 
 The DAO layer separates database access from business logic. Each entity has a corresponding DAO interface and a JDBC implementation class.
 
--CustomerDao -> JdbcCustomerDao
--ProductDao -> JdbcProductDao
--OrderDao -> JbbcOrderDao
--OrderItemDao -> JbdcOrderItemDao
+- CustomerDao -> JdbcCustomerDao
+- ProductDao -> JdbcProductDao
+- OrderDao -> JbbcOrderDao
+- OrderItemDao -> JbdcOrderItemDao
 
 The service layer depends only on the DAO interface, allowing the underlying database implementation to be changed without affecting the business logic.
 
@@ -86,13 +86,14 @@ All SQL statements use PreparedStatement to prevent SQL injection and follow the
 Jackson’s ObjectMapper is used to convert DTO objects to and from JSON.
 
 Implemented methods:
--customerToJson(Customer)
--customerFromJson(String json)
--customerListToJson(List<Customer>)
+- customerToJson(Customer)
+- customerFromJson(String json)
+- customerListToJson(List<Customer>)
 
--productToJson(Product)
--productFromJson(String json)
--productListToJson(List<Product>)
+
+- productToJson(Product)
+- productFromJson(String json)
+- productListToJson(List<Product>)
 
 Round-trip testing ensures that objects can be converted to JSON and reconstructed without data loss.
 
