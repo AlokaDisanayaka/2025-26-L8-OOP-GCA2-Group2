@@ -4,6 +4,7 @@ import org.DTO.Customer;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public interface CustomerDao {
 
@@ -16,4 +17,7 @@ public interface CustomerDao {
     Customer insertCustomer(Customer customer);
 
     Customer updateCustomer(int id, Customer customer);
+
+    //filter customers using a Predicate
+    List<Customer> findCustomersByFilter(Predicate<Customer> filter);
 }
