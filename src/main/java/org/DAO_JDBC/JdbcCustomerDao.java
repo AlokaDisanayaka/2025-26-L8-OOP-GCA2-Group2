@@ -149,8 +149,9 @@ public class JdbcCustomerDao implements CustomerDao {
         List<Customer> allCustomers = getAllCustomers();
 
         // Loop through all customers
-        for (Customer customer : allCustomers) {
-
+        for (int i =0;i< allCustomers.size();i++)
+        {
+            Customer customer=allCustomers.get(i);
             // If the customer matches the filter, add it to the result list
             if (filter.test(customer))
             {
