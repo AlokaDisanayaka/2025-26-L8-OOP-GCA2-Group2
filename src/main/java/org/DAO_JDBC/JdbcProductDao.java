@@ -7,6 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * JDBC implementation of ProductDao
@@ -162,5 +163,29 @@ public class JdbcProductDao implements ProductDao {
         } catch (SQLException e) {
             throw new RuntimeException("Error deleting product", e);
         }
+    }
+
+
+    @Override
+    public List<Product> findProductsByFilter(Predicate<Product> filter) {
+
+        // Create a list to hold matching products..
+        List<Product> matchingProducts = new ArrayList<>();
+
+        // Get all products first
+        List<Product> allProducts = getAllProducts();
+
+        // Loop through all products
+        for (int i=0;i< allProducts.size();i++)
+        {
+            Product product=allProducts.get(i);
+            // If the product matches the filter, add it to the result list
+            if (filter.test(product))
+            {
+                matchingProducts.add(product);
+            }
+        }
+
+        return matchingProducts;
     }
 }
