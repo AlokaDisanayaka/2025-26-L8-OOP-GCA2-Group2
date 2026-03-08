@@ -117,6 +117,42 @@ public class Main {
         }
 
 
+     // CUSTOMER FILTER TESTS
+
+        System.out.println("\nFILTER CUSTOMERS BY NAME CONTAINING 'a'(lowercase a)");
+
+        List<Customer> filteredCustomers = customerService.findCustomersByFilter(
+                customer -> customer.getName().toLowerCase().contains("a")
+        );
+
+        for (int i=0;i< filteredCustomers.size();i++)
+        {
+            Customer c= filteredCustomers.get(i);
+            System.out.println(
+                    c.getCustomerId() + " | " +
+                            c.getName() + " | " +
+                            c.getEmail() + " | " +
+                            c.getPhone()
+            );
+        }
+
+        System.out.println("\nFILTER CUSTOMERS BY EMAIL CONTAINING 'email.com'");
+
+        List<Customer> emailCustomers = customerService.findCustomersByFilter(
+                customer -> customer.getEmail().contains("email.com")
+        );
+
+        for (int i=0;i< emailCustomers.size();i++)
+        {
+            Customer c= emailCustomers.get(i);
+            System.out.println(
+                    c.getCustomerId() + " | " +
+                            c.getName() + " | " +
+                            c.getEmail() + " | " +
+                            c.getPhone()
+            );
+        }
+
 
         //--------------------------------------------------------------------
         // TEST PRODUCT
