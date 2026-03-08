@@ -3,6 +3,7 @@ import org.DAO.CustomerDao;
 import org.DAO_JDBC.JdbcCustomerDao;
 import org.DTO.Customer;
 import org.JsonUtil.CustomerJsonUtil;
+import org.JsonUtil.ProductJsonUtil;
 import org.Services.CustomerService;
 
 import org.DAO.ProductDao;
@@ -336,6 +337,36 @@ public class Main {
                             p.isActive()
             );
         }
+
+
+        // PRODUCT JSON TESTS
+
+        System.out.println("\n\nPRODUCT JSON TESTS");
+
+        // Create one sample product object
+        Product product = new Product(1, "Laptop", 999.99, 10, true);
+
+        // Convert Product object to JSON
+        String productJson = ProductJsonUtil.productToJson(product);
+        System.out.println("\nProduct object converted to JSON:");
+        System.out.println(productJson);
+
+        // Convert JSON back to Product object
+        Product productFromJson = ProductJsonUtil.productFromJson(productJson);
+        System.out.println("\nJSON converted back to Product object:");
+        System.out.println("ID: " + productFromJson.getProductId());
+        System.out.println("Name: " + productFromJson.getProductName());
+        System.out.println("Price: " + productFromJson.getUnitPrice());
+        System.out.println("Stock: " + productFromJson.getStockQty());
+        System.out.println("Active: " + productFromJson.isActive());
+
+        // Get all products from database
+        List<Product> productList = productService.getAllProducts();
+
+        // Convert list of products to JSON
+        String productListJson = ProductJsonUtil.productListToJson(productList);
+        System.out.println("\nProduct list converted to JSON:");
+        System.out.println(productListJson);
 
 
 
