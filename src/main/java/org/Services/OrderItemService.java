@@ -5,6 +5,8 @@ import org.DTO.OrderItem;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class OrderItemService
 {
@@ -44,4 +46,14 @@ public class OrderItemService
     {
         return orderItemDao.deleteOrderItemById(id);
     }
+
+    //Filter with Predicate
+    public List<OrderItem> findOrderItemsByFilter(Predicate<OrderItem> filter)
+    {
+        return orderItemDao.getAllOrderItems()
+        .stream()
+        .filter(filter)
+        .collect(Collectors.toList());
+    }
+
 }
