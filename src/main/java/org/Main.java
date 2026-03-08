@@ -376,6 +376,15 @@ public class Main {
         System.out.println("\nProduct list converted to JSON:");
         System.out.println(productListJson);
 
+        // Product round trip check
+        Product roundTripProduct = ProductJsonUtil.productFromJson(
+                ProductJsonUtil.productToJson(product)
+        );
+
+        System.out.println("\nProduct round trip worked:");
+        System.out.println("Name: " + roundTripProduct.getProductName());
+        System.out.println("Price: " + roundTripProduct.getUnitPrice());
+
 
 
        //------------------------------------------------------------------
