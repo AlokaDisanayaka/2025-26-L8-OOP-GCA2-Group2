@@ -185,6 +185,14 @@ public class Main {
         System.out.println("\nCustomer list converted to JSON:");
         System.out.println(customerListJson);
 
+        // Customer round trip check
+        Customer roundTripCustomer = CustomerJsonUtil.customerFromJson(
+                CustomerJsonUtil.customerToJson(customer)
+        );
+
+        System.out.println("\nCustomer round trip worked:");
+        System.out.println("Name: " + roundTripCustomer.getName());
+        System.out.println("Email: " + roundTripCustomer.getEmail());
 
         //--------------------------------------------------------------------
         // TEST PRODUCT
