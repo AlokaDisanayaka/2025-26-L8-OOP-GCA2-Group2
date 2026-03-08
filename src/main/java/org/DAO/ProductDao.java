@@ -2,6 +2,7 @@ package org.DAO;
 import org.DTO.Product;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public interface ProductDao {
 
@@ -19,4 +20,7 @@ public interface ProductDao {
 
     // Delete product by ID
     boolean deleteProductById(int id);
+
+    //filter products using a Predicate
+    List<Product> findProductsByFilter(Predicate<Product> filter);
 }
