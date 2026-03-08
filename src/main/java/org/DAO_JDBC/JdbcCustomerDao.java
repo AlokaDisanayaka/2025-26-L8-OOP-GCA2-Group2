@@ -8,6 +8,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 //Implements the CustomerDao interface using JDBC and SQL with PreparedStatements
 public class JdbcCustomerDao implements CustomerDao {
@@ -135,5 +136,28 @@ public class JdbcCustomerDao implements CustomerDao {
         } catch (SQLException e) {
             throw new RuntimeException("Error updating customer", e);
         }
+    }
+
+    @Override
+    public List<Customer> findCustomersByFilter(Predicate<Customer> filter)
+    {
+
+        // Create a list to hold matching customers
+        List<Customer> matchingCustomers = new ArrayList<>();
+
+        // Get all customers first
+        List<Customer> allCustomers = getAllCustomers();
+
+        // Loop through all customers
+        for (Customer customer : allCustomers) {
+
+            // If the customer matches the filter, add it to the result list
+            if (filter.test(customer))
+            {
+                matchingCustomers.add(customer);
+            }
+        }
+
+        return matchingCustomers;
     }
 }
