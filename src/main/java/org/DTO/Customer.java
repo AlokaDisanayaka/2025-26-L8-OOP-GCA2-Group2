@@ -8,20 +8,29 @@ public class Customer {
 
     public Customer(int customerId, String name, String email, String phone)
     {
-        setCustomerId(customerId);
-        setName(name);
-        setEmail(email);
-        setPhone(phone);
+        this.customerId=customerId;
+        this.name=name;
+        this.email=email;
+        this.phone=phone;
     }
+    public Customer()
+    {
+
+    }
+
 
     public Customer(String name, String email, String phone)
     {
-        this(0, name, email, phone);
+        this.customerId=0;
+        this.name=name;
+        this.email=email;
+        this.phone=phone;
+
     }
 
     public int getCustomerId()
     {
-        return customerId;
+        return this.customerId;
     }
 
     public void setCustomerId(int customerId)
@@ -35,7 +44,7 @@ public class Customer {
 
     public String getName()
     {
-        return name;
+        return this.name;
     }
 
     public void setName(String name)
@@ -48,7 +57,7 @@ public class Customer {
 
     public String getEmail()
     {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email)
@@ -63,7 +72,7 @@ public class Customer {
 
     public String getPhone()
     {
-        return phone;
+        return this.phone;
     }
 
     public void setPhone(String phone)
