@@ -22,14 +22,14 @@ Our project is an Online Shop Order Management System which models a real e-comm
   - Victoria Olabode — `D00279232`
 
 ### Key features (Stage 1 Implemented)
--DTO classes with encapsulated validated fields for each entity
--DAO layer implemented using the JDBC API and PreparedStatements
--Full CRUD operations for Customer and Product
--Predicate-based filtering for flexible querying
--JSON serialization and deserialization using Jackson
--Round-trip JSON conversion testing
--MySQL relational database with normalized schema
--Architecture diagram showing Client → Server → DAO → Database
+- DTO classes with encapsulated validated fields for each entity
+- DAO layer implemented using the JDBC API and PreparedStatements
+- Full CRUD operations for Customer and Product
+- Predicate-based filtering for flexible querying
+- JSON serialization and deserialization using Jackson
+- Round-trip JSON conversion testing
+- MySQL relational database with normalized schema
+- Architecture diagram showing Client → Server → DAO → Database
 
 Future stages will extend the system with:
 - a multithreaded client–server architecture
