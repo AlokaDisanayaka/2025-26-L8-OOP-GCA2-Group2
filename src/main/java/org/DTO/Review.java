@@ -58,6 +58,10 @@ public class Review {
 
     public void setCustomerId(int customerId)
     {
+        if (customerId < 0)
+        {
+            throw new IllegalArgumentException("Customer ID cannot be negative");
+        }
         this.customerId = customerId;
     }
 
@@ -68,6 +72,10 @@ public class Review {
 
     public void setProductId(int productId)
     {
+        if (productId < 0)
+        {
+            throw new IllegalArgumentException("Product ID cannot be negative");
+        }
         this.productId = productId;
     }
 
@@ -78,6 +86,10 @@ public class Review {
 
     public void setRating(int rating)
     {
+        if (rating < 1 || rating > 5)
+        {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
         this.rating = rating;
     }
 
@@ -88,7 +100,11 @@ public class Review {
 
     public void setComment(String comment)
     {
-        this.comment = comment;
+        if (comment == null || comment.trim().isEmpty())
+        {
+            throw new IllegalArgumentException("Comment cannot be blank");
+        }
+        this.comment = comment.trim();
     }
 
     public Timestamp getReviewDate()
@@ -98,6 +114,10 @@ public class Review {
 
     public void setReviewDate(Timestamp reviewDate)
     {
+        if (reviewDate == null)
+        {
+            throw new IllegalArgumentException("Review date cannot be null");
+        }
         this.reviewDate = reviewDate;
     }
 }
