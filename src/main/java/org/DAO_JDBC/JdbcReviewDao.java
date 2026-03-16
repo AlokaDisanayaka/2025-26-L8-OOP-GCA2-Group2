@@ -168,6 +168,6 @@ public class JdbcReviewDao implements ReviewDao {
             }
         }
 
-        return matchingReviews;
+        return
     }
 }
