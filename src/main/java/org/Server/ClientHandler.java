@@ -1,6 +1,14 @@
 package org.Server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.DAO.CustomerDao;
+import org.DAO.ProductDao;
+import org.DAO_JDBC.JdbcCustomerDao;
+import org.DAO_JDBC.JdbcProductDao;
+import org.DTO.Product;
+import org.DTO.Customer;
+import org.Services.CustomerService;
+import org.Services.ProductService;
 import org.Interface.ObjectMapperProvider;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
@@ -10,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
+import java.util.Optional;
 
  // Handles one connected client and runs on its own thread.
 
@@ -18,12 +28,23 @@ public class ClientHandler implements Runnable {
     private final Socket clientSocket;
     private final ObjectMapper mapper;
 
-    public ClientHandler(Socket clientSocket)
-    {
+    //services used by the server
+    private final CustomerService customerService;
+    private final ProductService productService;
+
+    public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
         this.mapper = ObjectMapperProvider.getMapper();
-    }
 
+
+        //create Dao objects
+        CustomerDao customerDao = new JdbcCustomerDao();
+        ProductDao productDao = new JdbcProductDao();
+
+        //create service objects
+        this.customerService= new CustomerService(customerDao);
+        this.productService=new ProductService(productDao);
+    }
     @Override
     public void run() {
 
