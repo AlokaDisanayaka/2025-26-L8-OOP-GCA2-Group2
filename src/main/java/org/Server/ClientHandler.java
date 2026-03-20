@@ -115,4 +115,99 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
+
+     // the method handles one request and returns a JSON response string.
+    private String handleRequest(ClientRequest request) throws Exception {
+
+        String action = request.getAction();
+        String entity = request.getEntity();
+
+
+        // CUSTOMER REQUESTS
+        //-----------------------------------------------------------------------
+        if ("customer".equalsIgnoreCase(entity))
+        {
+
+            // Get all customers
+            if ("getAll".equalsIgnoreCase(action))
+            {
+                List<Customer> customers = customerService.getAllCustomers();
+
+                ServerResponse<List<Customer>> response = ServerResponse.success("Customers retrieved successfully", customers);
+
+                return mapper.writeValueAsString(response);
+            }
+
+            // Get customer by ID
+            if ("getById".equalsIgnoreCase(action))
+            {
+
+                if (request.getId() == null)
+                {
+                    ServerResponse<String> response = ServerResponse.error("Customer ID is required");
+                    return mapper.writeValueAsString(response);
+                }
+
+                Optional<Customer> customer = customerService.getCustomerById(request.getId());
+
+                if (customer.isPresent())
+                {
+                    ServerResponse<Customer> response = ServerResponse.success("Customer found", customer.get());
+                    return mapper.writeValueAsString(response);
+                }
+
+                else
+                {
+                    ServerResponse<String> response = ServerResponse.error("Customer not found");
+                    return mapper.writeValueAsString(response);
+                }
+            }
+        }
+
+        // PRODUCT REQUESTS
+        // --------------------------------------------------------------------------------
+        if ("product".equalsIgnoreCase(entity))
+        {
+
+            // Get all products
+            if ("getAll".equalsIgnoreCase(action))
+            {
+                List<Product> products = productService.getAllProducts();
+
+                ServerResponse<List<Product>> response = ServerResponse.success("Products retrieved successfully", products);
+
+                return mapper.writeValueAsString(response);
+            }
+
+            // Get product by ID
+            if ("getById".equalsIgnoreCase(action))
+            {
+
+                if (request.getId() == null)
+                {
+                    ServerResponse<String> response = ServerResponse.error("Product ID is required");
+                    return mapper.writeValueAsString(response);
+                }
+
+                Optional<Product> product = productService.getProductById(request.getId());
+
+                if (product.isPresent())
+                {
+                    ServerResponse<Product> response = ServerResponse.success("Product found", product.get());
+                    return mapper.writeValueAsString(response);
+                }
+                else
+                {
+                    ServerResponse<String> response = ServerResponse.error("Product not found");
+                    return mapper.writeValueAsString(response);
+                }
+            }
+        }
+
+        // If the request does not match any supported action/entity error message
+        ServerResponse<String> response = ServerResponse.error("Unsupported action or entity");
+        return mapper.writeValueAsString(response);
+    }
 }
+
