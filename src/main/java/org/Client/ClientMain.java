@@ -13,6 +13,24 @@ public class ClientMain {
 
     public static void main(String[] args) {
 
+        // Test different requests one by one
+        sendRequest(new ClientRequest("getAll", "customer", null, null));
+        sendRequest(new ClientRequest("getById", "customer", 1, null));
+
+        sendRequest(new ClientRequest("getAll", "product", null, null));
+        sendRequest(new ClientRequest("getById", "product", 1, null));
+    }
+
+    /**
+     * the method sendRequest=>
+     * Opens a connection to the server,
+     * sends one request,
+     * prints the response,
+     * then closes the connection.
+     * .....................................
+     */
+    public static void sendRequest(ClientRequest request) {
+
         try (
                 Socket socket = new Socket("localhost", 5000);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -21,33 +39,27 @@ public class ClientMain {
                 )
         )
         {
-
             ObjectMapper mapper = new ObjectMapper();
 
-            // Create a simple request
-            ClientRequest request = new ClientRequest(
-                    "getAll",
-                    "product",
-                    null,
-                    null
-            );
-
-            // Convert request object to JSON
+            // converting  the request object into JSON
             String requestJson = mapper.writeValueAsString(request);
 
-            // Send request to server
+            System.out.println("\nSending Request:");
+            System.out.println(requestJson);
+
+            // Send the JSON request to the server
             out.println(requestJson);
 
-            // Read server response
+            // read the JSON response from the server
             String responseJson = in.readLine();
 
-            // Print raw JSON response
-            System.out.println("Response from server:");
+            System.out.println("\nResponse from the Server:");
             System.out.println(responseJson);
 
         }
         catch (Exception e)
         {
+            System.out.println("Client error: " + e.getMessage());
             e.printStackTrace();
         }
     }
