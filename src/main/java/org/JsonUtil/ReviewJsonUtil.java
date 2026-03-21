@@ -30,7 +30,7 @@ public class ReviewJsonUtil {
         try {
             return mapper.writeValueAsString(reviews);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting Review list to JSON", e);
+            hrow new RuntimeException("Error converting Review list to JSON", e);
         }
     }
 }
