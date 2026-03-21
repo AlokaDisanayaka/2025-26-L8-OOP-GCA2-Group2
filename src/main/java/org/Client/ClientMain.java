@@ -15,8 +15,6 @@ import java.net.Socket;
 //testing client
 public class ClientMain
 {
-    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
-
     public static void main(String[] args) {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -32,10 +30,9 @@ public class ClientMain
             //testing add customer
             Customer newCustomer = new Customer("Server Test Customer", "servertest@email.com", "0871111111");
             String customerJson = mapper.writeValueAsString(newCustomer);
+            sendRequest(new ClientRequest("add", "customer", null, customerJson));
             //testing delete customer by id
             sendRequest(new ClientRequest("delete", "customer", 21, null));
-
-            sendRequest(new ClientRequest("add", "customer", null, customerJson));
 
             //PRODUCT
             //-------------------------------------------------------------
@@ -47,8 +44,9 @@ public class ClientMain
             //testing add product
             Product newProduct = new Product("Server Test Product", 123.45, 8, true);
             String productJson = mapper.writeValueAsString(newProduct);
-
             sendRequest(new ClientRequest("add", "product", null, productJson));
+            //testing delete product by id
+            sendRequest(new ClientRequest("delete", "product", 21, null));
 
 
             //ORDERS
@@ -61,12 +59,12 @@ public class ClientMain
 
             //insert new order
             Orders newOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.NEW);
-            String orderJson = MAPPER.writeValueAsString(newOrder);
+            String orderJson = mapper.writeValueAsString(newOrder);
             sendRequest(new ClientRequest("insert", "orders", null, orderJson));
 
             //update order
             Orders updatedOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.PAID);
-            String updatedOrderJson = MAPPER.writeValueAsString(updatedOrder);
+            String updatedOrderJson = mapper.writeValueAsString(updatedOrder);
             sendRequest(new ClientRequest("update", "orders", 1, updatedOrderJson));
 
             //delete order
