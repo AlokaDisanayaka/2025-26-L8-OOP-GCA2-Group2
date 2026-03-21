@@ -31,12 +31,13 @@ public class ClientMain
             Customer newCustomer = new Customer("Server Test Customer", "servertest@email.com", "0871111111");
             String customerJson = mapper.writeValueAsString(newCustomer);
             sendRequest(new ClientRequest("add", "customer", null, customerJson));
+            //testing update customer
+            Customer updatedCustomer = new Customer("Updated Server Customer", "updatedserver@email.com", "0899999999");
+            String updatedCustomerJson = mapper.writeValueAsString(updatedCustomer);
+            sendRequest(new ClientRequest("update", "customer", 1, updatedCustomerJson));
             //testing delete customer by id
             sendRequest(new ClientRequest("delete", "customer", 21, null));
-            //testing update customer
-            Product updatedProduct = new Product("Updated Server Product", 555.55, 20, true);
-            String updatedProductJson = mapper.writeValueAsString(updatedProduct);
-            sendRequest(new ClientRequest("update", "product", 1, updatedProductJson));
+
 
             //PRODUCT
             //-------------------------------------------------------------
@@ -49,6 +50,10 @@ public class ClientMain
             Product newProduct = new Product("Server Test Product", 123.45, 8, true);
             String productJson = mapper.writeValueAsString(newProduct);
             sendRequest(new ClientRequest("add", "product", null, productJson));
+            //testing upadate product by id
+            Product updatedProduct = new Product("Updated Server Product", 555.55, 20, true);
+            String updatedProductJson = mapper.writeValueAsString(updatedProduct);
+            sendRequest(new ClientRequest("update", "product", 1, updatedProductJson));
             //testing delete product by id
             sendRequest(new ClientRequest("delete", "product", 21, null));
 
