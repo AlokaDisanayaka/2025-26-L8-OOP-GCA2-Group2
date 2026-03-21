@@ -94,13 +94,13 @@ public class ClientHandler implements Runnable
         }
         catch (Exception e)
         {
-            // always return a structured error response
             try
             {
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
+                // Clean and clear  error message
                 ServerResponse<String> errorResponse =
-                        ServerResponse.error("Server failed to process request");
+                        ServerResponse.error("Server error: " + e.getMessage());
 
                 out.println(mapper.writeValueAsString(errorResponse));
 
@@ -110,7 +110,8 @@ public class ClientHandler implements Runnable
                 System.out.println("Error sending error response: " + ioException.getMessage());
             }
 
-            System.out.println("Client handler error: " + e.getMessage());
+            //  full error only on server side
+            System.out.println("Server exception:");
             e.printStackTrace();
 
         }
