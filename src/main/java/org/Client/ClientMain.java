@@ -33,6 +33,10 @@ public class ClientMain
             sendRequest(new ClientRequest("add", "customer", null, customerJson));
             //testing delete customer by id
             sendRequest(new ClientRequest("delete", "customer", 21, null));
+            //testing update customer
+            Product updatedProduct = new Product("Updated Server Product", 555.55, 20, true);
+            String updatedProductJson = mapper.writeValueAsString(updatedProduct);
+            sendRequest(new ClientRequest("update", "product", 1, updatedProductJson));
 
             //PRODUCT
             //-------------------------------------------------------------
