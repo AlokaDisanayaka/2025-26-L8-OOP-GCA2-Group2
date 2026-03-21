@@ -185,7 +185,7 @@ public class ClientHandler implements Runnable {
                 // Convert jsonData into a Customer object
                 Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
 
-                // Insert customer using service layer
+                // Insert customer using service
                 Customer insertedCustomer = customerService.addCustomer(customer);
 
                 // Return inserted customer (with the generated ID)
@@ -232,6 +232,29 @@ public class ClientHandler implements Runnable {
                     ServerResponse<String> response = ServerResponse.error("Product not found");
                     return mapper.writeValueAsString(response);
                 }
+            }
+
+            // Add new product
+            if ("add".equalsIgnoreCase(action))
+            {
+
+                // Check that jsonData was sent
+                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                {
+                    ServerResponse<String> response = ServerResponse.error("Product JSON data is required");
+                    return mapper.writeValueAsString(response);
+                }
+
+                // Convert jsonData into a Product object
+                Product product = mapper.readValue(request.getJsonData(), Product.class);
+
+                // Insert product using service
+                Product insertedProduct = productService.addProduct(product);
+
+                // Return inserted product (with the generated ID)
+                ServerResponse<Product> response = ServerResponse.success("Product added successfully", insertedProduct);
+
+                return mapper.writeValueAsString(response);
             }
         }
         // REVIEW REQUESTS
