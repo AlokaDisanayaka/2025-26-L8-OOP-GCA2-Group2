@@ -4,15 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.DAO.CustomerDao;
 import org.DAO.ProductDao;
 import org.DAO.ReviewDao;
+import org.DAO.OrdersDao;
 import org.DAO_JDBC.JdbcCustomerDao;
 import org.DAO_JDBC.JdbcProductDao;
 import org.DAO_JDBC.JdbcReviewDao;
+import org.DAO_JDBC.JdbcOrdersDao;
 import org.DTO.Product;
 import org.DTO.Customer;
 import org.DTO.Review;
+import org.DTO.Orders;
 import org.Services.CustomerService;
 import org.Services.ProductService;
 import org.Services.ReviewService;
+import org.Services.OrdersService;
 import org.Interface.ObjectMapperProvider;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
@@ -27,8 +31,8 @@ import java.util.Optional;
 
  // Handles one connected client and runs on its own thread.
 
-public class ClientHandler implements Runnable {
-
+public class ClientHandler implements Runnable
+{
     private final Socket clientSocket;
     private final ObjectMapper mapper;
     private final ReviewService reviewService;
@@ -36,31 +40,33 @@ public class ClientHandler implements Runnable {
     //services used by the server
     private final CustomerService customerService;
     private final ProductService productService;
+    private final OrdersService ordersService;
 
-    public ClientHandler(Socket clientSocket) {
+    public ClientHandler(Socket clientSocket)
+    {
         this.clientSocket = clientSocket;
         this.mapper = ObjectMapperProvider.getMapper();
-
 
         //create Dao objects
         CustomerDao customerDao = new JdbcCustomerDao();
         ProductDao productDao = new JdbcProductDao();
         ReviewDao reviewDao = new JdbcReviewDao();
+        OrdersDao ordersDao = new JdbcOrdersDao();
 
         //create service objects
         this.customerService= new CustomerService(customerDao);
         this.productService=new ProductService(productDao);
         this.reviewService = new ReviewService(reviewDao);
+        this.ordersService = new OrdersService(ordersDao);
     }
     @Override
-    public void run() {
-
+    public void run()
+    {
         try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
         )
         {
-
             // Read one line of JSON sent by the client
             String requestJson = in.readLine();
 
@@ -125,8 +131,8 @@ public class ClientHandler implements Runnable {
 
 
      // the method handles one request and returns a JSON response string.
-    private String handleRequest(ClientRequest request) throws Exception {
-
+    private String handleRequest(ClientRequest request) throws Exception
+    {
         String action = request.getAction();
         String entity = request.getEntity();
 
@@ -376,6 +382,91 @@ public class ClientHandler implements Runnable {
                 }
             }
         }
+
+        //ORDERS REQUEST
+        //-----------------------------------------------------------------------
+        if ("orders".equalsIgnoreCase(entity))
+        {
+            //Get all orders
+            if ("getAll".equalsIgnoreCase(action))
+            {
+                List<Orders> orders = ordersService.getAllOrders();
+
+                ServerResponse<List<Orders>> response =
+                        ServerResponse.success("Orders retrieved successfully", orders);
+
+                return mapper.writeValueAsString(response);
+            }
+
+            //Get order by ID
+            if ("getById".equalsIgnoreCase(action))
+            {
+                if (request.getId() == null)
+                {
+                    return mapper.writeValueAsString(ServerResponse.error("Order ID is required"));
+                }
+
+                Optional<Orders> order = ordersService.getOrderById(request.getId());
+
+                if (order.isPresent())
+                {
+                    return mapper.writeValueAsString(ServerResponse.success("Order found", order.get()));
+                }
+                else
+                {
+                    return mapper.writeValueAsString(ServerResponse.error("Order not found"));
+                }
+            }
+
+            //Insert order
+            if ("insert".equalsIgnoreCase(action))
+            {
+                if (request.getJsonData() == null || request.getJsonData().isEmpty())
+                {
+                    return mapper.writeValueAsString(ServerResponse.error("Order JSON data is required"));
+                }
+
+                Orders order = mapper.readValue(request.getJsonData(), Orders.class);
+                Orders savedOrder = ordersService.addOrder(order);
+
+                return mapper.writeValueAsString(ServerResponse.success("Order inserted successfully", savedOrder));
+            }
+
+            //Update order
+            if ("update".equalsIgnoreCase(action))
+            {
+                if (request.getId() == null)
+                {
+                    return mapper.writeValueAsString(ServerResponse.error("Order ID is required for update"));
+                }
+
+                Orders order = mapper.readValue(request.getJsonData(), Orders.class);
+                Orders updated = ordersService.updateOrder(request.getId(), order);
+
+                return mapper.writeValueAsString(ServerResponse.success("Order updated successfully", updated));
+            }
+
+            //Delete order
+            if ("delete".equalsIgnoreCase(action))
+            {
+                if (request.getId() == null)
+                {
+                    return mapper.writeValueAsString(ServerResponse.error("Order ID is required for delete"));
+                }
+
+                boolean deleted = ordersService.deleteOrder(request.getId());
+
+                if (deleted)
+                {
+                    return mapper.writeValueAsString(ServerResponse.success("Order deleted successfully", null));
+                }
+                else
+                {
+                    return mapper.writeValueAsString(ServerResponse.error("Order not found"));
+                }
+            }
+        }
+
 
         // If the request does not match any supported action/entity error message
         ServerResponse<String> response = ServerResponse.error("Unsupported action or entity");
