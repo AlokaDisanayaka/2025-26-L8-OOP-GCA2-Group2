@@ -3,12 +3,16 @@ package org.Server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.DAO.CustomerDao;
 import org.DAO.ProductDao;
+import org.DAO.ReviewDao;
 import org.DAO_JDBC.JdbcCustomerDao;
 import org.DAO_JDBC.JdbcProductDao;
+import org.DAO_JDBC.JdbcReviewDao;
 import org.DTO.Product;
 import org.DTO.Customer;
+import org.DTO.Review;
 import org.Services.CustomerService;
 import org.Services.ProductService;
+import org.Services.ReviewService;
 import org.Interface.ObjectMapperProvider;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
@@ -27,6 +31,7 @@ public class ClientHandler implements Runnable {
 
     private final Socket clientSocket;
     private final ObjectMapper mapper;
+    private final ReviewService reviewService;
 
     //services used by the server
     private final CustomerService customerService;
@@ -40,10 +45,12 @@ public class ClientHandler implements Runnable {
         //create Dao objects
         CustomerDao customerDao = new JdbcCustomerDao();
         ProductDao productDao = new JdbcProductDao();
+        ReviewDao reviewDao = new JdbcReviewDao();
 
         //create service objects
         this.customerService= new CustomerService(customerDao);
         this.productService=new ProductService(productDao);
+        this.reviewService = new ReviewService(reviewDao);
     }
     @Override
     public void run() {
@@ -204,10 +211,106 @@ public class ClientHandler implements Runnable {
                 }
             }
         }
+        // REVIEW REQUESTS
+
+        if ("review".equalsIgnoreCase(entity)) {
+
+            // Get all reviews - MY PART ADDED
+            if ("getAll".equalsIgnoreCase(action)) {
+                List<Review> reviews = reviewService.getallReviews();
+
+                ServerResponse<List<Review>> response =
+                        ServerResponse.success("Reviews retrieved successfully", reviews);
+
+                return mapper.writeValueAsString(response);
+            }
+
+            // Get review by ID
+            if ("getById".equalsIgnoreCase(action)) {
+                if (request.getId() == null) {
+                    ServerResponse<String> response = ServerResponse.error("Review ID is required");
+                    return mapper.writeValueAsString(response);
+                }
+
+                Optional<Review> review = reviewService.getreviewbyid(request.getId());
+
+                if (review.isPresent()) {
+                    ServerResponse<Review> response =
+                            ServerResponse.success("Review found", review.get());
+                    return mapper.writeValueAsString(response);
+                } else {
+                    ServerResponse<String> response = ServerResponse.error("Review not found");
+                    return mapper.writeValueAsString(response);
+                }
+            }
+
+            // Insert review
+            if ("insert".equalsIgnoreCase(action)) {
+                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty()) {
+                    ServerResponse<String> response =
+                            ServerResponse.error("Review JSON data is required");
+                    return mapper.writeValueAsString(response);
+                }
+
+                Review review = mapper.readValue(request.getJsonData(), Review.class);
+                Review savedReview = reviewService.insertReview(review);
+
+                ServerResponse<Review> response =
+                        ServerResponse.success("Review inserted successfully", savedReview);
+
+                return mapper.writeValueAsString(response);
+            }
+
+            // Update review
+            if ("update".equalsIgnoreCase(action)) {
+                if (request.getId() == null) {
+                    ServerResponse<String> response =
+                            ServerResponse.error("Review ID is required for update");
+                    return mapper.writeValueAsString(response);
+                }
+
+                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty()) {
+                    ServerResponse<String> response =
+                            ServerResponse.error("Review JSON data is required for update");
+                    return mapper.writeValueAsString(response);
+                }
+
+                Review review = mapper.readValue(request.getJsonData(), Review.class);
+                Review updatedReview = reviewService.updateReview(request.getId(), review);
+
+                ServerResponse<Review> response =
+                        ServerResponse.success("Review updated successfully", updatedReview);
+
+                return mapper.writeValueAsString(response);
+            }
+
+            // Delete review
+            if ("delete".equalsIgnoreCase(action)) {
+                if (request.getId() == null) {
+                    ServerResponse<String> response =
+                            ServerResponse.error("Review ID is required for delete");
+                    return mapper.writeValueAsString(response);
+                }
+
+                boolean deleted = reviewService.deleteReview(request.getId());
+
+                if (deleted) {
+                    ServerResponse<String> response =
+                            ServerResponse.success("Review deleted successfully", null);
+                    return mapper.writeValueAsString(response);
+                } else {
+                    ServerResponse<String> response =
+                            ServerResponse.error("Review not found or could not be deleted");
+                    return mapper.writeValueAsString(response);
+                }
+            }
+        }
 
         // If the request does not match any supported action/entity error message
         ServerResponse<String> response = ServerResponse.error("Unsupported action or entity");
         return mapper.writeValueAsString(response);
     }
 }
+
+
 
