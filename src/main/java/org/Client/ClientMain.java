@@ -1,5 +1,6 @@
 package org.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.DTO.Customer;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
 
@@ -13,12 +14,35 @@ public class ClientMain {
 
     public static void main(String[] args) {
 
-        // Test different requests one by one
-        sendRequest(new ClientRequest("getAll", "customer", null, null));
-        sendRequest(new ClientRequest("getById", "customer", 1, null));
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            // Test different requests one by one
+            //CUSTOMER
+            //-------------------------------------------------------------
 
-        sendRequest(new ClientRequest("getAll", "product", null, null));
-        sendRequest(new ClientRequest("getById", "product", 1, null));
+            //testing get all customers
+            sendRequest(new ClientRequest("getAll", "customer", null, null));
+            //testing get customers by id
+            sendRequest(new ClientRequest("getById", "customer", 1, null));
+            //testing add customer
+            Customer newCustomer = new Customer("Server Test Customer", "servertest@email.com", "0871111111");
+            String customerJson = mapper.writeValueAsString(newCustomer);
+
+            sendRequest(new ClientRequest("add", "customer", null, customerJson));
+
+            //PRODUCT
+            //-------------------------------------------------------------
+
+            //testing get all products
+            sendRequest(new ClientRequest("getAll", "product", null, null));
+            //testing get product by id
+            sendRequest(new ClientRequest("getById", "product", 1, null));
+        }
+        catch (Exception e)
+        {
+            System.out.println("Client setup error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
