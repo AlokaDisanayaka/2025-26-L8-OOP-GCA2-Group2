@@ -193,6 +193,31 @@ public class ClientHandler implements Runnable {
 
                 return mapper.writeValueAsString(response);
             }
+
+            // Delete customer by ID
+            if ("delete".equalsIgnoreCase(action)) {
+
+                // Check if an id was provided
+                if (request.getId() == null)
+                {
+                    ServerResponse<String> response = ServerResponse.error("Customer ID is required for delete");
+                    return mapper.writeValueAsString(response);
+                }
+
+                // Call service to delete customer
+                boolean deleted = customerService.deleteCustomer(request.getId());
+
+                if (deleted)
+                {
+                    ServerResponse<Boolean> response = ServerResponse.success("Customer deleted successfully", true);
+                    return mapper.writeValueAsString(response);
+                }
+                else
+                {
+                    ServerResponse<Boolean> response = ServerResponse.error("Customer not found or could not be deleted");
+                    return mapper.writeValueAsString(response);
+                }
+            }
         }
 
         // PRODUCT REQUESTS
