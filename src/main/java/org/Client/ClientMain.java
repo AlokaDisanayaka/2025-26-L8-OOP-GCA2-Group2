@@ -28,6 +28,8 @@ public class ClientMain {
             //testing add customer
             Customer newCustomer = new Customer("Server Test Customer", "servertest@email.com", "0871111111");
             String customerJson = mapper.writeValueAsString(newCustomer);
+            //testing delete customer by id
+            sendRequest(new ClientRequest("delete", "customer", 21, null));
 
             sendRequest(new ClientRequest("add", "customer", null, customerJson));
 
