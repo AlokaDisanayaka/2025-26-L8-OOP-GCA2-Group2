@@ -1,6 +1,7 @@
 package org.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.DTO.Customer;
+import org.DTO.Product;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
 
@@ -37,6 +38,11 @@ public class ClientMain {
             sendRequest(new ClientRequest("getAll", "product", null, null));
             //testing get product by id
             sendRequest(new ClientRequest("getById", "product", 1, null));
+            //testing add product
+            Product newProduct = new Product("Server Test Product", 123.45, 8, true);
+            String productJson = mapper.writeValueAsString(newProduct);
+
+            sendRequest(new ClientRequest("add", "product", null, productJson));
         }
         catch (Exception e)
         {
