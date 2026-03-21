@@ -170,6 +170,29 @@ public class ClientHandler implements Runnable {
                     return mapper.writeValueAsString(response);
                 }
             }
+
+            // Add new customer
+            if ("add".equalsIgnoreCase(action))
+            {
+
+                // Check whwther  jsonData was sent
+                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                {
+                    ServerResponse<String> response = ServerResponse.error("Customer JSON data is required");
+                    return mapper.writeValueAsString(response);
+                }
+
+                // Convert jsonData into a Customer object
+                Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
+
+                // Insert customer using service layer
+                Customer insertedCustomer = customerService.addCustomer(customer);
+
+                // Return inserted customer (with the generated ID)
+                ServerResponse<Customer> response = ServerResponse.success("Customer added successfully", insertedCustomer);
+
+                return mapper.writeValueAsString(response);
+            }
         }
 
         // PRODUCT REQUESTS
