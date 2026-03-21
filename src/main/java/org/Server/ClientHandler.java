@@ -344,6 +344,36 @@ public class ClientHandler implements Runnable
                     return mapper.writeValueAsString(response);
                 }
             }
+
+            // Update product by ID
+            if ("update".equalsIgnoreCase(action))
+            {
+
+                // Check that an ID was provided
+                if (request.getId() == null)
+                {
+                    ServerResponse<String> response = ServerResponse.error("Product ID is required for update");
+                    return mapper.writeValueAsString(response);
+                }
+
+                // Check that updated product JSON was provided
+                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                {
+                    ServerResponse<String> response = ServerResponse.error("Updated product JSON data is required");
+                    return mapper.writeValueAsString(response);
+                }
+
+                // Convert jsonData into a Product object
+                Product product = mapper.readValue(request.getJsonData(), Product.class);
+
+                // Update the product using service
+                Product updatedProduct = productService.updateProduct(request.getId(), product);
+
+                // Return updated product
+                ServerResponse<Product> response = ServerResponse.success("Product updated successfully", updatedProduct);
+
+                return mapper.writeValueAsString(response);
+            }
         }
         // REVIEW REQUESTS
 
