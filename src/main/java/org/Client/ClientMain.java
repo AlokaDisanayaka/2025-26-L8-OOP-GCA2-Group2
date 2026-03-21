@@ -1,7 +1,9 @@
 package org.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.DTO.Customer;
 import org.DTO.Product;
+import org.DTO.Orders;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
 
@@ -11,7 +13,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 //testing client
-public class ClientMain {
+public class ClientMain
+{
+    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     public static void main(String[] args) {
 
@@ -43,6 +47,29 @@ public class ClientMain {
             String productJson = mapper.writeValueAsString(newProduct);
 
             sendRequest(new ClientRequest("add", "product", null, productJson));
+
+
+            //ORDERS
+            //-------------------------------------------------------------
+            //get all orders
+            sendRequest(new ClientRequest("getAll", "orders", null, null));
+
+            //get order by id
+            sendRequest(new ClientRequest("getById", "orders", 1, null));
+
+            //insert new order
+            Orders newOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.NEW);
+            String orderJson = MAPPER.writeValueAsString(newOrder);
+            sendRequest(new ClientRequest("insert", "orders", null, orderJson));
+
+            //update order
+            Orders updatedOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.PAID);
+            String updatedOrderJson = MAPPER.writeValueAsString(updatedOrder);
+            sendRequest(new ClientRequest("update", "orders", 1, updatedOrderJson));
+
+            //delete order
+            sendRequest(new ClientRequest("delete", "orders", 1, null));
+
         }
         catch (Exception e)
         {
