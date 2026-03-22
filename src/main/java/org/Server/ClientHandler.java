@@ -5,18 +5,22 @@ import org.DAO.CustomerDao;
 import org.DAO.ProductDao;
 import org.DAO.ReviewDao;
 import org.DAO.OrdersDao;
+import org.DAO.OrderItemDao;
 import org.DAO_JDBC.JdbcCustomerDao;
 import org.DAO_JDBC.JdbcProductDao;
 import org.DAO_JDBC.JdbcReviewDao;
 import org.DAO_JDBC.JdbcOrdersDao;
+import org.DAO_JDBC.JdbcOrderItemDao;
 import org.DTO.Product;
 import org.DTO.Customer;
 import org.DTO.Review;
 import org.DTO.Orders;
+import org.DTO.OrderItem;
 import org.Services.CustomerService;
 import org.Services.ProductService;
 import org.Services.ReviewService;
 import org.Services.OrdersService;
+import org.Services.OrderItemService;
 import org.Interface.ObjectMapperProvider;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
@@ -41,6 +45,7 @@ public class ClientHandler implements Runnable
     private final CustomerService customerService;
     private final ProductService productService;
     private final OrdersService ordersService;
+    private final OrderItemService orderItemService;
 
     public ClientHandler(Socket clientSocket)
     {
@@ -52,12 +57,14 @@ public class ClientHandler implements Runnable
         ProductDao productDao = new JdbcProductDao();
         ReviewDao reviewDao = new JdbcReviewDao();
         OrdersDao ordersDao = new JdbcOrdersDao();
+        OrderItemDao orderItemDao = new JdbcOrderItemDao();
 
         //create service objects
         this.customerService= new CustomerService(customerDao);
         this.productService=new ProductService(productDao);
         this.reviewService = new ReviewService(reviewDao);
         this.ordersService = new OrdersService(ordersDao);
+        this.orderItemService = new OrderItemService(orderItemDao);
     }
     @Override
     public void run()
@@ -475,9 +482,11 @@ public class ClientHandler implements Runnable
 
             //ORDERS REQUEST
             //-----------------------------------------------------------------------
-            if ("orders".equalsIgnoreCase(entity)) {
+            if ("orders".equalsIgnoreCase(entity))
+            {
                 //Get all orders
-                if ("getAll".equalsIgnoreCase(action)) {
+                if ("getAll".equalsIgnoreCase(action))
+                {
                     List<Orders> orders = ordersService.getAllOrders();
 
                     ServerResponse<List<Orders>> response =
@@ -487,23 +496,30 @@ public class ClientHandler implements Runnable
                 }
 
                 //Get order by ID
-                if ("getById".equalsIgnoreCase(action)) {
-                    if (request.getId() == null) {
+                if ("getById".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
                         return mapper.writeValueAsString(ServerResponse.error("Order ID is required"));
                     }
 
                     Optional<Orders> order = ordersService.getOrderById(request.getId());
 
-                    if (order.isPresent()) {
+                    if (order.isPresent())
+                    {
                         return mapper.writeValueAsString(ServerResponse.success("Order found", order.get()));
-                    } else {
+                    }
+                    else
+                    {
                         return mapper.writeValueAsString(ServerResponse.error("Order not found"));
                     }
                 }
 
                 //Insert order
-                if ("insert".equalsIgnoreCase(action)) {
-                    if (request.getJsonData() == null || request.getJsonData().isEmpty()) {
+                if ("insert".equalsIgnoreCase(action))
+                {
+                    if (request.getJsonData() == null || request.getJsonData().isEmpty())
+                    {
                         return mapper.writeValueAsString(ServerResponse.error("Order JSON data is required"));
                     }
 
@@ -514,8 +530,10 @@ public class ClientHandler implements Runnable
                 }
 
                 //Update order
-                if ("update".equalsIgnoreCase(action)) {
-                    if (request.getId() == null) {
+                if ("update".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
                         return mapper.writeValueAsString(ServerResponse.error("Order ID is required for update"));
                     }
 
@@ -546,6 +564,71 @@ public class ClientHandler implements Runnable
                 }
             }
 
+            //ORDER ITEM REQUESTS
+            //-----------------------------------------------------------------------
+            if ("orderitem".equalsIgnoreCase(entity))
+            {
+                //Get all items
+                if ("getAll".equalsIgnoreCase(action))
+                {
+                    List<OrderItem> items = orderItemService.getAllOrderItems();
+
+                    return mapper.writeValueAsString(ServerResponse.success("Order items retrieved", items));
+                }
+
+                //Get by ID
+                if ("getById".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem ID required"));
+                    }
+
+                    Optional<OrderItem> item = orderItemService.getOrderItemById(request.getId());
+
+                    if (item.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("OrderItem found", item.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem not found"));
+                    }
+                }
+
+                //Insert
+                if ("insert".equalsIgnoreCase(action))
+                {
+                    OrderItem item = mapper.readValue(request.getJsonData(), OrderItem.class);
+                    OrderItem saved = orderItemService.addOrderItem(item);
+
+                    return mapper.writeValueAsString(ServerResponse.success("OrderItem inserted", saved));
+                }
+
+                //Update
+                if ("update".equalsIgnoreCase(action))
+                {
+                    OrderItem item = mapper.readValue(request.getJsonData(), OrderItem.class);
+                    OrderItem updated = orderItemService.updateOrderItem(request.getId(), item);
+
+                    return mapper.writeValueAsString(ServerResponse.success("OrderItem updated", updated));
+                }
+
+                //Delete
+                if ("delete".equalsIgnoreCase(action))
+                {
+                    boolean deleted = orderItemService.deleteOrderItem(request.getId());
+
+                    if (deleted)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("OrderItem deleted", null));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem not found"));
+                    }
+                }
+            }
 
             // If the request does not match any supported action/entity error message
             ServerResponse<String> response = ServerResponse.error("Unsupported action or entity");
