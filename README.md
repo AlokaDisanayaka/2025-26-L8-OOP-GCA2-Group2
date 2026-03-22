@@ -250,7 +250,7 @@ Returns all records for an entity
 
 Returns one record by ID
 
--add
+- add
 
 Adds a new entity
 Returns inserted object with generated ID
