@@ -16,11 +16,11 @@ Our project is an Online Shop Order Management System which models a real e-comm
 
 ### Team
 
-Group ID: 2025-26-L8-OOP-GCA2-Group2
-Members:
-Aloka Muthumani Disanayaka Salpitige — D00274456
-Adhira Pillai — D00277397
-Victoria Olabode — D00279232
+- **Group ID:** `2025-26-L8-OOP-GCA2-Group2`
+- **Members:**
+  - Aloka Muthumani Disanayaka Salpitige — `D00274456`
+  - Adhira Pillai — `D00277397`
+  - Victoria Olabode — `D00279232`
 
 ### Key features (Stage 1 + Stage 2 Implemented)
 
@@ -60,16 +60,16 @@ Maven
 
 ### 2.1 Database setup
 
-Create a database:
-shopspheredb
+1. Create a database:
+`shopspheredb`
 
-Run the script:
+2. Run the script:
 ```
 shopspheredb.sql
 ```
 
-Verify seed data:
-Each table has at least 10 rows.
+3. Verify seed data:
+  - Each table has at least 10 rows.
 
 ### 2.2 Configure credentials
 ```
@@ -79,7 +79,7 @@ db.password=...
 ```
 ### 2.3 Run the application (Stage 1 testing)
 
-Main class: app.Main
+Main class: `app.Main`
 
 This class is used to test:
 
@@ -90,16 +90,16 @@ This class is used to test:
 ### Stage 2 Execution
 ### 2.4 Run the Server
 
-Main class: server.ServerMain
+Main class: `server.ServerMain`
 
-Default port: 5000
+Default port: `5000`
 
 Expected output:
-Server listening on port 5000
+`Server listening on port 5000`
 
 ### 2.5 Run the Client
 
-Main class: client.ClientMain
+Main class: `client.ClientMain`
 
 The client:
 
@@ -117,6 +117,7 @@ The DAO layer separates database access from business logic. Each entity has a c
 - ProductDao -> JdbcProductDao
 - OrderDao -> JbbcOrderDao
 - OrderItemDao -> JbdcOrderItemDao
+- ReviewDao -> JdbcReviewDao
 
 The service layer depends only on the DAO interface, allowing the underlying database implementation to be changed without affecting the business logic.
 
@@ -127,14 +128,23 @@ All SQL statements use PreparedStatement to prevent SQL injection and follow the
 Jackson’s ObjectMapper is used to convert DTO objects to and from JSON.
 
 Implemented methods:
+```
+customerToJson(Customer)
+customerFromJson(String json)
+customerListToJson(List)
 
-- customerToJson(Customer)
-- customerFromJson(String json)
-- customerListToJson(List)
+productToJson(Product)
+productFromJson(String json)
+productListToJson(List)
 
-- productToJson(Product)
-- productFromJson(String json)
-- productListToJson(List)
+ordersToJson(Orders order)
+ordersFromJson(String json)
+ordersListToJson(List<Orders> orders)
+
+orderItemToJson(OrderItem item)
+orderItemFromJson(String json)
+orderItemListToJson(List<OrderItem> items)
+```
 
 Round-trip testing ensures that objects can be converted to JSON and reconstructed without data loss.
 
@@ -159,30 +169,35 @@ org
  │     Product.java
  │     Orders.java
  │     OrderItem.java
+ │     Review.java
  │
  ├── DAO
  │     CustomerDao.java
  │     ProductDao.java
  │     OrdersDao.java
  │     OrderItemDao.java
+ │     ReviewDao.java
  │
  ├── DAO_JDBC
  │     JdbcCustomerDao.java
  │     JdbcProductDao.java
  │     JdbcOrdersDao.java
  │     JdbcOrderItemDao.java
+ │     JdbcReviewDao.java
  │
  ├── Services
  │     CustomerService.java
  │     ProductService.java
  │     OrdersService.java
  │     OrderItemService.java
+ │     ReviewService.java
  │
  ├── JsonUtil
  │     CustomerJsonUtil.java
  │     ProductJsonUtil.java
  │     OrdersJsonUtil.java
  │     OrderItemJsonUtil.java
+ │     ReviewJsonUtil.java
  │
  └── DB
        DBConnection.java
@@ -197,7 +212,7 @@ org
   
 ### 6.2 Architecture diagram
 
-- Path: docs/architecture.md
+- Path: `docs/architecture.md`
 - Diagram format: Mermaid
 
 ## 7. Protocol Documentation (Stage 2)
