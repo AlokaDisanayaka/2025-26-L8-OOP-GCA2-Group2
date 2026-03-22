@@ -132,434 +132,443 @@ public class ClientHandler implements Runnable
 
 
      // the method handles one request and returns a JSON response string.
-    private String handleRequest(ClientRequest request) throws Exception
-    {
-        String action = request.getAction();
-        String entity = request.getEntity();
-
-
-        // CUSTOMER REQUESTS
-        //-----------------------------------------------------------------------
-        if ("customer".equalsIgnoreCase(entity))
+    private String handleRequest(ClientRequest request) throws Exception {
+        try
         {
+            String action = request.getAction();
+            String entity = request.getEntity();
 
-            // Get all customers
-            if ("getAll".equalsIgnoreCase(action))
-            {
-                List<Customer> customers = customerService.getAllCustomers();
 
-                ServerResponse<List<Customer>> response = ServerResponse.success("Customers retrieved successfully", customers);
-
-                return mapper.writeValueAsString(response);
-            }
-
-            // Get customer by ID
-            if ("getById".equalsIgnoreCase(action))
+            // CUSTOMER REQUESTS
+            //-----------------------------------------------------------------------
+            if ("customer".equalsIgnoreCase(entity))
             {
 
-                if (request.getId() == null)
+                // Get all customers
+                if ("getAll".equalsIgnoreCase(action))
                 {
-                    ServerResponse<String> response = ServerResponse.error("Customer ID is required");
+                    List<Customer> customers = customerService.getAllCustomers();
+
+                    ServerResponse<List<Customer>> response = ServerResponse.success("Customers retrieved successfully", customers);
+
                     return mapper.writeValueAsString(response);
                 }
 
-                Optional<Customer> customer = customerService.getCustomerById(request.getId());
-
-                if (customer.isPresent())
+                // Get customer by ID
+                if ("getById".equalsIgnoreCase(action))
                 {
-                    ServerResponse<Customer> response = ServerResponse.success("Customer found", customer.get());
+
+                    if (request.getId() == null)
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Customer ID is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        ServerResponse<Customer> response = ServerResponse.success("Customer found", customer.get());
+                        return mapper.writeValueAsString(response);
+                    }
+                    else
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Customer not found");
+                        return mapper.writeValueAsString(response);
+                    }
+                }
+
+                // Add new customer
+                if ("add".equalsIgnoreCase(action))
+                {
+
+                    // Check whwther  jsonData was sent
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Customer JSON data is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    // Convert jsonData into a Customer object
+                    Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
+
+                    // Insert customer using service
+                    Customer insertedCustomer = customerService.addCustomer(customer);
+
+                    // Return inserted customer (with the generated ID)
+                    ServerResponse<Customer> response = ServerResponse.success("Customer added successfully", insertedCustomer);
+
                     return mapper.writeValueAsString(response);
                 }
 
-                else
+                // Delete customer by ID
+                if ("delete".equalsIgnoreCase(action))
                 {
-                    ServerResponse<String> response = ServerResponse.error("Customer not found");
+
+                    // Check if an id was provided
+                    if (request.getId() == null)
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Customer ID is required for delete");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    // Call service to delete customer
+                    boolean deleted = customerService.deleteCustomer(request.getId());
+
+                    if (deleted)
+                    {
+                        ServerResponse<Boolean> response = ServerResponse.success("Customer deleted successfully", true);
+                        return mapper.writeValueAsString(response);
+                    }
+                    else
+                    {
+                        ServerResponse<Boolean> response = ServerResponse.error("Customer not found or could not be deleted");
+                        return mapper.writeValueAsString(response);
+                    }
+                }
+
+                // Update customer by ID
+                if ("update".equalsIgnoreCase(action))
+                {
+
+                    // check whether an ID was provided
+                    if (request.getId() == null)
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Customer ID is required for update");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    // Check that updated customer JSON was provided
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Updated customer JSON data is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    // Convert jsonData into a Customer object
+                    Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
+
+                    // Update the customer using service layer
+                    Customer updatedCustomer = customerService.updateCustomer(request.getId(), customer);
+
+                    // Return updated customer
+                    ServerResponse<Customer> response = ServerResponse.success("Customer updated successfully", updatedCustomer);
+
                     return mapper.writeValueAsString(response);
                 }
             }
 
-            // Add new customer
-            if ("add".equalsIgnoreCase(action))
+            // PRODUCT REQUESTS
+            // --------------------------------------------------------------------------------
+            if ("product".equalsIgnoreCase(entity))
             {
 
-                // Check whwther  jsonData was sent
-                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                // Get all products
+                if ("getAll".equalsIgnoreCase(action))
                 {
-                    ServerResponse<String> response = ServerResponse.error("Customer JSON data is required");
+                    List<Product> products = productService.getAllProducts();
+
+                    ServerResponse<List<Product>> response = ServerResponse.success("Products retrieved successfully", products);
+
                     return mapper.writeValueAsString(response);
                 }
 
-                // Convert jsonData into a Customer object
-                Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
-
-                // Insert customer using service
-                Customer insertedCustomer = customerService.addCustomer(customer);
-
-                // Return inserted customer (with the generated ID)
-                ServerResponse<Customer> response = ServerResponse.success("Customer added successfully", insertedCustomer);
-
-                return mapper.writeValueAsString(response);
-            }
-
-            // Delete customer by ID
-            if ("delete".equalsIgnoreCase(action)) {
-
-                // Check if an id was provided
-                if (request.getId() == null)
+                // Get product by ID
+                if ("getById".equalsIgnoreCase(action))
                 {
-                    ServerResponse<String> response = ServerResponse.error("Customer ID is required for delete");
+
+                    if (request.getId() == null)
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Product ID is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    Optional<Product> product = productService.getProductById(request.getId());
+
+                    if (product.isPresent())
+                    {
+                        ServerResponse<Product> response = ServerResponse.success("Product found", product.get());
+                        return mapper.writeValueAsString(response);
+                    }
+                    else
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Product not found");
+                        return mapper.writeValueAsString(response);
+                    }
+                }
+
+                // Add new product
+                if ("add".equalsIgnoreCase(action))
+                {
+
+                    // Check that jsonData was sent
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Product JSON data is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    // Convert jsonData into a Product object
+                    Product product = mapper.readValue(request.getJsonData(), Product.class);
+
+                    // Insert product using service
+                    Product insertedProduct = productService.addProduct(product);
+
+                    // Return inserted product (with the generated ID)
+                    ServerResponse<Product> response = ServerResponse.success("Product added successfully", insertedProduct);
+
                     return mapper.writeValueAsString(response);
                 }
 
-                // Call service to delete customer
-                boolean deleted = customerService.deleteCustomer(request.getId());
 
-                if (deleted)
+                // Delete product by ID x
+                if ("delete".equalsIgnoreCase(action))
                 {
-                    ServerResponse<Boolean> response = ServerResponse.success("Customer deleted successfully", true);
-                    return mapper.writeValueAsString(response);
-                }
-                else
-                {
-                    ServerResponse<Boolean> response = ServerResponse.error("Customer not found or could not be deleted");
-                    return mapper.writeValueAsString(response);
-                }
-            }
 
-            // Update customer by ID
-            if ("update".equalsIgnoreCase(action))
-            {
+                    // Check whether an ID was provided
+                    if (request.getId() == null)
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Product ID is required for delete");
+                        return mapper.writeValueAsString(response);
+                    }
 
-                // check whether an ID was provided
-                if (request.getId() == null)
-                {
-                    ServerResponse<String> response = ServerResponse.error("Customer ID is required for update");
-                    return mapper.writeValueAsString(response);
-                }
+                    // Call service to delete product
+                    boolean deleted = productService.deleteProduct(request.getId());
 
-                // Check that updated customer JSON was provided
-                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
-                {
-                    ServerResponse<String> response = ServerResponse.error("Updated customer JSON data is required");
-                    return mapper.writeValueAsString(response);
+                    if (deleted)
+                    {
+                        ServerResponse<Boolean> response = ServerResponse.success("Product deleted successfully", true);
+                        return mapper.writeValueAsString(response);
+                    }
+                    else
+                    {
+                        ServerResponse<Boolean> response = ServerResponse.error("Product not found or could not be deleted");
+                        return mapper.writeValueAsString(response);
+                    }
                 }
 
-                // Convert jsonData into a Customer object
-                Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
-
-                // Update the customer using service layer
-                Customer updatedCustomer = customerService.updateCustomer(request.getId(), customer);
-
-                // Return updated customer
-                ServerResponse<Customer> response = ServerResponse.success("Customer updated successfully", updatedCustomer);
-
-                return mapper.writeValueAsString(response);
-            }
-        }
-
-        // PRODUCT REQUESTS
-        // --------------------------------------------------------------------------------
-        if ("product".equalsIgnoreCase(entity))
-        {
-
-            // Get all products
-            if ("getAll".equalsIgnoreCase(action))
-            {
-                List<Product> products = productService.getAllProducts();
-
-                ServerResponse<List<Product>> response = ServerResponse.success("Products retrieved successfully", products);
-
-                return mapper.writeValueAsString(response);
-            }
-
-            // Get product by ID
-            if ("getById".equalsIgnoreCase(action))
-            {
-
-                if (request.getId() == null)
+                // Update product by ID
+                if ("update".equalsIgnoreCase(action))
                 {
-                    ServerResponse<String> response = ServerResponse.error("Product ID is required");
-                    return mapper.writeValueAsString(response);
-                }
 
-                Optional<Product> product = productService.getProductById(request.getId());
+                    // Check that an ID was provided
+                    if (request.getId() == null)
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Product ID is required for update");
+                        return mapper.writeValueAsString(response);
+                    }
 
-                if (product.isPresent())
-                {
-                    ServerResponse<Product> response = ServerResponse.success("Product found", product.get());
-                    return mapper.writeValueAsString(response);
-                }
-                else
-                {
-                    ServerResponse<String> response = ServerResponse.error("Product not found");
-                    return mapper.writeValueAsString(response);
-                }
-            }
+                    // Check that updated product JSON was provided
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                    {
+                        ServerResponse<String> response = ServerResponse.error("Updated product JSON data is required");
+                        return mapper.writeValueAsString(response);
+                    }
 
-            // Add new product
-            if ("add".equalsIgnoreCase(action))
-            {
+                    // Convert jsonData into a Product object
+                    Product product = mapper.readValue(request.getJsonData(), Product.class);
 
-                // Check that jsonData was sent
-                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
-                {
-                    ServerResponse<String> response = ServerResponse.error("Product JSON data is required");
-                    return mapper.writeValueAsString(response);
-                }
+                    // Update the product using service
+                    Product updatedProduct = productService.updateProduct(request.getId(), product);
 
-                // Convert jsonData into a Product object
-                Product product = mapper.readValue(request.getJsonData(), Product.class);
+                    // Return updated product
+                    ServerResponse<Product> response = ServerResponse.success("Product updated successfully", updatedProduct);
 
-                // Insert product using service
-                Product insertedProduct = productService.addProduct(product);
-
-                // Return inserted product (with the generated ID)
-                ServerResponse<Product> response = ServerResponse.success("Product added successfully", insertedProduct);
-
-                return mapper.writeValueAsString(response);
-            }
-
-
-            // Delete product by ID x
-            if ("delete".equalsIgnoreCase(action))
-            {
-
-                // Check whether an ID was provided
-                if (request.getId() == null)
-                {
-                    ServerResponse<String> response = ServerResponse.error("Product ID is required for delete");
-                    return mapper.writeValueAsString(response);
-                }
-
-                // Call service to delete product
-                boolean deleted = productService.deleteProduct(request.getId());
-
-                if (deleted)
-                {
-                    ServerResponse<Boolean> response = ServerResponse.success("Product deleted successfully", true);
-                    return mapper.writeValueAsString(response);
-                }
-                else
-                {
-                    ServerResponse<Boolean> response = ServerResponse.error("Product not found or could not be deleted");
                     return mapper.writeValueAsString(response);
                 }
             }
+            // REVIEW REQUESTS
 
-            // Update product by ID
-            if ("update".equalsIgnoreCase(action))
-            {
+            if ("review".equalsIgnoreCase(entity)) {
 
-                // Check that an ID was provided
-                if (request.getId() == null)
-                {
-                    ServerResponse<String> response = ServerResponse.error("Product ID is required for update");
+                // Get all reviews - MY PART ADDED
+                if ("getAll".equalsIgnoreCase(action)) {
+                    List<Review> reviews = reviewService.getallReviews();
+
+                    ServerResponse<List<Review>> response =
+                            ServerResponse.success("Reviews retrieved successfully", reviews);
+
                     return mapper.writeValueAsString(response);
                 }
 
-                // Check that updated product JSON was provided
-                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
-                {
-                    ServerResponse<String> response = ServerResponse.error("Updated product JSON data is required");
-                    return mapper.writeValueAsString(response);
+                // Get review by ID
+                if ("getById".equalsIgnoreCase(action)) {
+                    if (request.getId() == null) {
+                        ServerResponse<String> response = ServerResponse.error("Review ID is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    Optional<Review> review = reviewService.getreviewbyid(request.getId());
+
+                    if (review.isPresent()) {
+                        ServerResponse<Review> response =
+                                ServerResponse.success("Review found", review.get());
+                        return mapper.writeValueAsString(response);
+                    } else {
+                        ServerResponse<String> response = ServerResponse.error("Review not found");
+                        return mapper.writeValueAsString(response);
+                    }
                 }
 
-                // Convert jsonData into a Product object
-                Product product = mapper.readValue(request.getJsonData(), Product.class);
+                // Insert review
+                if ("insert".equalsIgnoreCase(action)) {
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty()) {
+                        ServerResponse<String> response =
+                                ServerResponse.error("Review JSON data is required");
+                        return mapper.writeValueAsString(response);
+                    }
 
-                // Update the product using service
-                Product updatedProduct = productService.updateProduct(request.getId(), product);
+                    Review review = mapper.readValue(request.getJsonData(), Review.class);
+                    Review savedReview = reviewService.insertReview(review);
 
-                // Return updated product
-                ServerResponse<Product> response = ServerResponse.success("Product updated successfully", updatedProduct);
-
-                return mapper.writeValueAsString(response);
-            }
-        }
-        // REVIEW REQUESTS
-
-        if ("review".equalsIgnoreCase(entity)) {
-
-            // Get all reviews - MY PART ADDED
-            if ("getAll".equalsIgnoreCase(action)) {
-                List<Review> reviews = reviewService.getallReviews();
-
-                ServerResponse<List<Review>> response =
-                        ServerResponse.success("Reviews retrieved successfully", reviews);
-
-                return mapper.writeValueAsString(response);
-            }
-
-            // Get review by ID
-            if ("getById".equalsIgnoreCase(action)) {
-                if (request.getId() == null) {
-                    ServerResponse<String> response = ServerResponse.error("Review ID is required");
-                    return mapper.writeValueAsString(response);
-                }
-
-                Optional<Review> review = reviewService.getreviewbyid(request.getId());
-
-                if (review.isPresent()) {
                     ServerResponse<Review> response =
-                            ServerResponse.success("Review found", review.get());
+                            ServerResponse.success("Review inserted successfully", savedReview);
+
                     return mapper.writeValueAsString(response);
-                } else {
-                    ServerResponse<String> response = ServerResponse.error("Review not found");
+                }
+
+                // Update review
+                if ("update".equalsIgnoreCase(action)) {
+                    if (request.getId() == null) {
+                        ServerResponse<String> response =
+                                ServerResponse.error("Review ID is required for update");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty()) {
+                        ServerResponse<String> response =
+                                ServerResponse.error("Review JSON data is required for update");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    Review review = mapper.readValue(request.getJsonData(), Review.class);
+                    Review updatedReview = reviewService.updateReview(request.getId(), review);
+
+                    ServerResponse<Review> response =
+                            ServerResponse.success("Review updated successfully", updatedReview);
+
                     return mapper.writeValueAsString(response);
+                }
+
+                // Delete review
+                if ("delete".equalsIgnoreCase(action)) {
+                    if (request.getId() == null)
+                    {
+                        ServerResponse<String> response =
+                                ServerResponse.error("Review ID is required for delete");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    boolean deleted = reviewService.deleteReview(request.getId());
+
+                    if (deleted) {
+                        ServerResponse<String> response =
+                                ServerResponse.success("Review deleted successfully", null);
+                        return mapper.writeValueAsString(response);
+                    } else {
+                        ServerResponse<String> response =
+                                ServerResponse.error("Review not found or could not be deleted");
+                        return mapper.writeValueAsString(response);
+                    }
                 }
             }
 
-            // Insert review
-            if ("insert".equalsIgnoreCase(action)) {
-                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty()) {
-                    ServerResponse<String> response =
-                            ServerResponse.error("Review JSON data is required");
+            //ORDERS REQUEST
+            //-----------------------------------------------------------------------
+            if ("orders".equalsIgnoreCase(entity)) {
+                //Get all orders
+                if ("getAll".equalsIgnoreCase(action)) {
+                    List<Orders> orders = ordersService.getAllOrders();
+
+                    ServerResponse<List<Orders>> response =
+                            ServerResponse.success("Orders retrieved successfully", orders);
+
                     return mapper.writeValueAsString(response);
                 }
 
-                Review review = mapper.readValue(request.getJsonData(), Review.class);
-                Review savedReview = reviewService.insertReview(review);
+                //Get order by ID
+                if ("getById".equalsIgnoreCase(action)) {
+                    if (request.getId() == null) {
+                        return mapper.writeValueAsString(ServerResponse.error("Order ID is required"));
+                    }
 
-                ServerResponse<Review> response =
-                        ServerResponse.success("Review inserted successfully", savedReview);
+                    Optional<Orders> order = ordersService.getOrderById(request.getId());
 
-                return mapper.writeValueAsString(response);
+                    if (order.isPresent()) {
+                        return mapper.writeValueAsString(ServerResponse.success("Order found", order.get()));
+                    } else {
+                        return mapper.writeValueAsString(ServerResponse.error("Order not found"));
+                    }
+                }
+
+                //Insert order
+                if ("insert".equalsIgnoreCase(action)) {
+                    if (request.getJsonData() == null || request.getJsonData().isEmpty()) {
+                        return mapper.writeValueAsString(ServerResponse.error("Order JSON data is required"));
+                    }
+
+                    Orders order = mapper.readValue(request.getJsonData(), Orders.class);
+                    Orders savedOrder = ordersService.addOrder(order);
+
+                    return mapper.writeValueAsString(ServerResponse.success("Order inserted successfully", savedOrder));
+                }
+
+                //Update order
+                if ("update".equalsIgnoreCase(action)) {
+                    if (request.getId() == null) {
+                        return mapper.writeValueAsString(ServerResponse.error("Order ID is required for update"));
+                    }
+
+                    Orders order = mapper.readValue(request.getJsonData(), Orders.class);
+                    Orders updated = ordersService.updateOrder(request.getId(), order);
+
+                    return mapper.writeValueAsString(ServerResponse.success("Order updated successfully", updated));
+                }
+
+                //Delete order
+                if ("delete".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Order ID is required for delete"));
+                    }
+
+                    boolean deleted = ordersService.deleteOrder(request.getId());
+
+                    if (deleted)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Order deleted successfully", null));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Order not found"));
+                    }
+                }
             }
 
-            // Update review
-            if ("update".equalsIgnoreCase(action)) {
-                if (request.getId() == null) {
-                    ServerResponse<String> response =
-                            ServerResponse.error("Review ID is required for update");
-                    return mapper.writeValueAsString(response);
-                }
 
-                if (request.getJsonData() == null || request.getJsonData().trim().isEmpty()) {
-                    ServerResponse<String> response =
-                            ServerResponse.error("Review JSON data is required for update");
-                    return mapper.writeValueAsString(response);
-                }
-
-                Review review = mapper.readValue(request.getJsonData(), Review.class);
-                Review updatedReview = reviewService.updateReview(request.getId(), review);
-
-                ServerResponse<Review> response =
-                        ServerResponse.success("Review updated successfully", updatedReview);
-
-                return mapper.writeValueAsString(response);
-            }
-
-            // Delete review
-            if ("delete".equalsIgnoreCase(action)) {
-                if (request.getId() == null) {
-                    ServerResponse<String> response =
-                            ServerResponse.error("Review ID is required for delete");
-                    return mapper.writeValueAsString(response);
-                }
-
-                boolean deleted = reviewService.deleteReview(request.getId());
-
-                if (deleted) {
-                    ServerResponse<String> response =
-                            ServerResponse.success("Review deleted successfully", null);
-                    return mapper.writeValueAsString(response);
-                } else {
-                    ServerResponse<String> response =
-                            ServerResponse.error("Review not found or could not be deleted");
-                    return mapper.writeValueAsString(response);
-                }
-            }
+            // If the request does not match any supported action/entity error message
+            ServerResponse<String> response = ServerResponse.error("Unsupported action or entity");
+            return mapper.writeValueAsString(response);
         }
-
-        //ORDERS REQUEST
-        //-----------------------------------------------------------------------
-        if ("orders".equalsIgnoreCase(entity))
+        catch (Exception e)
         {
-            //Get all orders
-            if ("getAll".equalsIgnoreCase(action))
+
+            // Return structured error instead of crashing
+            ServerResponse<String> response = ServerResponse.error("Failed to process request: " + e.getMessage());
+
+            try
             {
-                List<Orders> orders = ordersService.getAllOrders();
-
-                ServerResponse<List<Orders>> response =
-                        ServerResponse.success("Orders retrieved successfully", orders);
-
                 return mapper.writeValueAsString(response);
             }
-
-            //Get order by ID
-            if ("getById".equalsIgnoreCase(action))
+            catch (Exception ex)
             {
-                if (request.getId() == null)
-                {
-                    return mapper.writeValueAsString(ServerResponse.error("Order ID is required"));
-                }
-
-                Optional<Orders> order = ordersService.getOrderById(request.getId());
-
-                if (order.isPresent())
-                {
-                    return mapper.writeValueAsString(ServerResponse.success("Order found", order.get()));
-                }
-                else
-                {
-                    return mapper.writeValueAsString(ServerResponse.error("Order not found"));
-                }
-            }
-
-            //Insert order
-            if ("insert".equalsIgnoreCase(action))
-            {
-                if (request.getJsonData() == null || request.getJsonData().isEmpty())
-                {
-                    return mapper.writeValueAsString(ServerResponse.error("Order JSON data is required"));
-                }
-
-                Orders order = mapper.readValue(request.getJsonData(), Orders.class);
-                Orders savedOrder = ordersService.addOrder(order);
-
-                return mapper.writeValueAsString(ServerResponse.success("Order inserted successfully", savedOrder));
-            }
-
-            //Update order
-            if ("update".equalsIgnoreCase(action))
-            {
-                if (request.getId() == null)
-                {
-                    return mapper.writeValueAsString(ServerResponse.error("Order ID is required for update"));
-                }
-
-                Orders order = mapper.readValue(request.getJsonData(), Orders.class);
-                Orders updated = ordersService.updateOrder(request.getId(), order);
-
-                return mapper.writeValueAsString(ServerResponse.success("Order updated successfully", updated));
-            }
-
-            //Delete order
-            if ("delete".equalsIgnoreCase(action))
-            {
-                if (request.getId() == null)
-                {
-                    return mapper.writeValueAsString(ServerResponse.error("Order ID is required for delete"));
-                }
-
-                boolean deleted = ordersService.deleteOrder(request.getId());
-
-                if (deleted)
-                {
-                    return mapper.writeValueAsString(ServerResponse.success("Order deleted successfully", null));
-                }
-                else
-                {
-                    return mapper.writeValueAsString(ServerResponse.error("Order not found"));
-                }
+                return "{\"status\":\"error\",\"message\":\"Critical server error\",\"data\":null}";
             }
         }
-
-
-        // If the request does not match any supported action/entity error message
-        ServerResponse<String> response = ServerResponse.error("Unsupported action or entity");
-        return mapper.writeValueAsString(response);
     }
+
+
 }
 
 
