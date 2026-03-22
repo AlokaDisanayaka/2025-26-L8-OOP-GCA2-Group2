@@ -4,6 +4,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.DTO.Customer;
 import org.DTO.Product;
 import org.DTO.Orders;
+import org.DTO.OrderItem;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
 
@@ -15,6 +16,9 @@ import java.net.Socket;
 //testing client
 public class ClientMain
 {
+    //For Orders to use LocalDateTime
+    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
+
     public static void main(String[] args) {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -68,16 +72,37 @@ public class ClientMain
 
             //insert new order
             Orders newOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.NEW);
-            String orderJson = mapper.writeValueAsString(newOrder);
+            String orderJson = MAPPER.writeValueAsString(newOrder);
             sendRequest(new ClientRequest("insert", "orders", null, orderJson));
 
             //update order
             Orders updatedOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.PAID);
-            String updatedOrderJson = mapper.writeValueAsString(updatedOrder);
+            String updatedOrderJson = MAPPER.writeValueAsString(updatedOrder);
             sendRequest(new ClientRequest("update", "orders", 1, updatedOrderJson));
 
             //delete order
             sendRequest(new ClientRequest("delete", "orders", 1, null));
+
+            // ORDER ITEMS
+            //-------------------------------------------------------------
+            //get all order items
+            sendRequest(new ClientRequest("getAll", "orderitem", null, null));
+
+            //get order item by id
+            sendRequest(new ClientRequest("getById", "orderitem", 1, null));
+
+            //insert order item
+            OrderItem newItem = new OrderItem(1, 1, 2, 99.99);
+            String itemJson = mapper.writeValueAsString(newItem);
+            sendRequest(new ClientRequest("insert", "orderitem", null, itemJson));
+
+            //update order item
+            OrderItem updatedItem = new OrderItem(1, 1, 5, 89.99);
+            String updatedItemJson = mapper.writeValueAsString(updatedItem);
+            sendRequest(new ClientRequest("update", "orderitem", 1, updatedItemJson));
+
+            //delete order item
+            sendRequest(new ClientRequest("delete", "orderitem", 1, null));
 
         }
         catch (Exception e)
