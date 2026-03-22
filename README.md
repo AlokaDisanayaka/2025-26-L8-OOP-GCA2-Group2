@@ -9,12 +9,12 @@ generated_at: "2026-03-04 20:12 Europe/Dublin"
 
 # 2025-26 - OOP - L8 - GCA2 — N-tier System
 
-##1. Project Overview
-###Domain summary
+## 1. Project Overview
+### Domain summary
 
 Our project is an Online Shop Order Management System which models a real e-commerce system that simulates how actual e-commerce businesses handle customers, products, and orders. This system allows multiple users to connect to a server and complete actions such as creating an account, browsing through products, and placing an order, along with the ability to review past order history. The system is supported by a relational database and implements the DAO pattern so that it separates business logic from data access. The system has four main entities: Customer, Product, Orders, and OrderItem. Customers can place multiple orders and each order can consist of many different products. The OrderItem entity operates as a join table to allow the system to maintain the many-to-many relationship between an order and product entity. The system has full CRUD functionality, provides stock management, calculates revenue from sales, and has sales reports. Binary file storage in this system represents data that may be associated with the domain, such as product images.
 
-###Team
+### Team
 
 Group ID: 2025-26-L8-OOP-GCA2-Group2
 Members:
@@ -22,7 +22,7 @@ Aloka Muthumani Disanayaka Salpitige — D00274456
 Adhira Pillai — D00277397
 Victoria Olabode — D00279232
 
-###Key features (Stage 1 + Stage 2 Implemented)
+### Key features (Stage 1 + Stage 2 Implemented)
 
 - DTO classes with encapsulated validated fields for each entity
 - DAO layer implemented using the JDBC API and PreparedStatements
@@ -33,7 +33,7 @@ Victoria Olabode — D00279232
 - MySQL relational database with normalized schema
 - Architecture diagram showing Client → Server → DAO → Database
 
-###Stage 2 additions:
+### Stage 2 additions:
 
 - Multithreaded client–server architecture using ExecutorService
 - JSON-based communication between client and server
@@ -46,35 +46,38 @@ Victoria Olabode — D00279232
         delete
 - Structured error handling (no raw exceptions sent to client)
 
-###Future stages will extend the system with:
+### Future stages will extend the system with:
 - binary file storage using BLOBs
 - automated testing using JUnit
   
-##2. How to Run
-###Prerequisites
+## 2. How to Run
+### Prerequisites
 
 Java: 17+
 IntelliJ IDEA
 MySQL Server (local)
 Maven
 
-###2.1 Database setup
+### 2.1 Database setup
 
 Create a database:
 shopspheredb
 
 Run the script:
+```
 shopspheredb.sql
+```
 
 Verify seed data:
 Each table has at least 10 rows.
 
-###2.2 Configure credentials
+### 2.2 Configure credentials
+```
 db.url=jdbc:mysql://localhost:3306/shopspheredb?useSSL=false&serverTimezone=UTC
 db.user=...
 db.password=...
-
-###2.3 Run the application (Stage 1 testing)
+```
+### 2.3 Run the application (Stage 1 testing)
 
 Main class: app.Main
 
@@ -84,8 +87,8 @@ This class is used to test:
 - Predicate filtering
 - JSON conversion
   
-###Stage 2 Execution
-###2.4 Run the Server
+### Stage 2 Execution
+### 2.4 Run the Server
 
 Main class: server.ServerMain
 
@@ -94,7 +97,7 @@ Default port: 5000
 Expected output:
 Server listening on port 5000
 
-###2.5 Run the Client
+### 2.5 Run the Client
 
 Main class: client.ClientMain
 
@@ -106,7 +109,7 @@ The client:
 
 Run multiple clients to demonstrate multithreading.
 
-##3. DAO Layer Overview
+## 3. DAO Layer Overview
 
 The DAO layer separates database access from business logic. Each entity has a corresponding DAO interface and a JDBC implementation class.
 
@@ -119,7 +122,7 @@ The service layer depends only on the DAO interface, allowing the underlying dat
 
 All SQL statements use PreparedStatement to prevent SQL injection and follow the project requirements.
 
-##4. JSON Conversion
+## 4. JSON Conversion
 
 Jackson’s ObjectMapper is used to convert DTO objects to and from JSON.
 
@@ -184,31 +187,32 @@ org
  └── DB
        DBConnection.java
 ```
-##6. Architecture Summary
+## 6. Architecture Summary
 
-###6.1 N-tier overview
+### 6.1 N-tier overview
 - Client (console application sending JSON requests)
 - Server (socket listener + request handlers + multithreading using ExecutorService)
 - DAO layer (interfaces + JDBC implementations)
 - Database (MySQL)
   
-###6.2 Architecture diagram
+### 6.2 Architecture diagram
 
 - Path: docs/architecture.md
 - Diagram format: Mermaid
 
-##7. Protocol Documentation (Stage 2)
+## 7. Protocol Documentation (Stage 2)
 
-##7.1 Request Format
+## 7.1 Request Format
+```
 {
   "action": "getAll",
   "entity": "customer",
   "id": null,
   "jsonData": null
 }
+```
 
-
-##7.2 Request Fields
+## 7.2 Request Fields
 - action → operation to perform
 (getAll, getById, add, update, delete)
 - entity → target entity
@@ -222,45 +226,47 @@ org
     update
 
 
-##7.3 Response Format
+## 7.3 Response Format
+```
 {
   "status": "success",
   "message": "Operation successful",
   "data": {}
 }
-
-
-##7.4 Response Fields
+```
+ 
+## 7.4 Response Fields
 - status → "success" or "error"
 - message → description of result
 - data → returned object or list
 
   
-##7.5 Supported Operations
-1. getAll
+## 7.5 Supported Operations
+- getAll
 
 Returns all records for an entity
 
-2. getById
+- getById
 
 Returns one record by ID
 
-3. add
+-add
 
 Adds a new entity
 Returns inserted object with generated ID
 
-4. update
+- update
 
 Updates an existing entity
 Returns updated object
 
-5. delete
+- delete
 
 Deletes a record by ID
 Returns success/failure response
 
-##7.6 Example Response (Success)
+## 7.6 Example Response (Success)
+```
 {
   "status": "success",
   "message": "Customer retrieved successfully",
@@ -271,10 +277,12 @@ Returns success/failure response
     "phone": "0851111111"
   }
 }
-
-##7.7 Example Response (Error)
+```
+## 7.7 Example Response (Error)
+```
 {
   "status": "error",
   "message": "Customer not found",
   "data": null
 }
+```
