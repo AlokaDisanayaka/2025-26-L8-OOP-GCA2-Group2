@@ -144,6 +144,10 @@ ordersListToJson(List<Orders> orders)
 orderItemToJson(OrderItem item)
 orderItemFromJson(String json)
 orderItemListToJson(List<OrderItem> items)
+
+reviewToJson(Review review)
+reviewFromJson(String json)
+reviewListToJson(List<Review> reviews)
 ```
 
 Round-trip testing ensures that objects can be converted to JSON and reconstructed without data loss.
