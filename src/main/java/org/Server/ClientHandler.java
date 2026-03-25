@@ -48,18 +48,18 @@ public class ClientHandler implements Runnable {
         ReviewDao reviewDao = new JdbcReviewDao();
 
         //create service objects
-        this.customerService= new CustomerService(customerDao);
-        this.productService=new ProductService(productDao);
+        this.customerService = new CustomerService(customerDao);
+        this.productService = new ProductService(productDao);
         this.reviewService = new ReviewService(reviewDao);
     }
+
     @Override
     public void run() {
 
         try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
-        )
-        {
+        ) {
 
             // Read one line of JSON sent by the client
             String requestJson = in.readLine();
@@ -85,12 +85,9 @@ public class ClientHandler implements Runnable {
             // Send JSON response back to client
             out.println(mapper.writeValueAsString(response));
 
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             // always return a structured error response
-            try
-            {
+            try {
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
                 ServerResponse<String> errorResponse =
@@ -98,33 +95,26 @@ public class ClientHandler implements Runnable {
 
                 out.println(mapper.writeValueAsString(errorResponse));
 
-            }
-            catch (IOException ioException)
-            {
+            } catch (IOException ioException) {
                 System.out.println("Error sending error response: " + ioException.getMessage());
             }
 
             System.out.println("Client handler error: " + e.getMessage());
             e.printStackTrace();
 
-        }
-        finally
-        {
+        } finally {
             // always close the socket when finished..
-            try
-            {
+            try {
                 clientSocket.close();
                 System.out.println("Client disconnected");
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 System.out.println("Error closing client socket: " + e.getMessage());
             }
         }
     }
 
 
-     // the method handles one request and returns a JSON response string.
+    // the method handles one request and returns a JSON response string.
     private String handleRequest(ClientRequest request) throws Exception {
 
         String action = request.getAction();
@@ -133,12 +123,10 @@ public class ClientHandler implements Runnable {
 
         // CUSTOMER REQUESTS
         //-----------------------------------------------------------------------
-        if ("customer".equalsIgnoreCase(entity))
-        {
+        if ("customer".equalsIgnoreCase(entity)) {
 
             // Get all customers
-            if ("getAll".equalsIgnoreCase(action))
-            {
+            if ("getAll".equalsIgnoreCase(action)) {
                 List<Customer> customers = customerService.getAllCustomers();
 
                 ServerResponse<List<Customer>> response = ServerResponse.success("Customers retrieved successfully", customers);
@@ -147,25 +135,19 @@ public class ClientHandler implements Runnable {
             }
 
             // Get customer by ID
-            if ("getById".equalsIgnoreCase(action))
-            {
+            if ("getById".equalsIgnoreCase(action)) {
 
-                if (request.getId() == null)
-                {
+                if (request.getId() == null) {
                     ServerResponse<String> response = ServerResponse.error("Customer ID is required");
                     return mapper.writeValueAsString(response);
                 }
 
                 Optional<Customer> customer = customerService.getCustomerById(request.getId());
 
-                if (customer.isPresent())
-                {
+                if (customer.isPresent()) {
                     ServerResponse<Customer> response = ServerResponse.success("Customer found", customer.get());
                     return mapper.writeValueAsString(response);
-                }
-
-                else
-                {
+                } else {
                     ServerResponse<String> response = ServerResponse.error("Customer not found");
                     return mapper.writeValueAsString(response);
                 }
@@ -174,12 +156,10 @@ public class ClientHandler implements Runnable {
 
         // PRODUCT REQUESTS
         // --------------------------------------------------------------------------------
-        if ("product".equalsIgnoreCase(entity))
-        {
+        if ("product".equalsIgnoreCase(entity)) {
 
             // Get all products
-            if ("getAll".equalsIgnoreCase(action))
-            {
+            if ("getAll".equalsIgnoreCase(action)) {
                 List<Product> products = productService.getAllProducts();
 
                 ServerResponse<List<Product>> response = ServerResponse.success("Products retrieved successfully", products);
@@ -188,24 +168,19 @@ public class ClientHandler implements Runnable {
             }
 
             // Get product by ID
-            if ("getById".equalsIgnoreCase(action))
-            {
+            if ("getById".equalsIgnoreCase(action)) {
 
-                if (request.getId() == null)
-                {
+                if (request.getId() == null) {
                     ServerResponse<String> response = ServerResponse.error("Product ID is required");
                     return mapper.writeValueAsString(response);
                 }
 
                 Optional<Product> product = productService.getProductById(request.getId());
 
-                if (product.isPresent())
-                {
+                if (product.isPresent()) {
                     ServerResponse<Product> response = ServerResponse.success("Product found", product.get());
                     return mapper.writeValueAsString(response);
-                }
-                else
-                {
+                } else {
                     ServerResponse<String> response = ServerResponse.error("Product not found");
                     return mapper.writeValueAsString(response);
                 }
@@ -214,16 +189,6 @@ public class ClientHandler implements Runnable {
         // REVIEW REQUESTS
 
         if ("review".equalsIgnoreCase(entity)) {
-
-            // Get all reviews -
-            if ("getAll".equalsIgnoreCase(action)) {
-                List<Review> reviews = reviewService.getallReviews();
-
-                ServerResponse<List<Review>> response =
-                        ServerResponse.success("Reviews retrieved successfully", reviews);
-
-                return mapper.writeValueAsString(response);
-            }
 
             // Get review by ID
             if ("getById".equalsIgnoreCase(action)) {
@@ -303,63 +268,34 @@ public class ClientHandler implements Runnable {
                             ServerResponse.error("Review not found or could not be deleted");
                     return mapper.writeValueAsString(response);
                 }
+            }
 
-                // Filter reviews by rating
-                if ("filterByRating".equalsIgnoreCase(action)) {
-                    if (request.getId() == null) {
-                        ServerResponse<String> response =
-                                ServerResponse.error("Rating value is required");
-                        return mapper.writeValueAsString(response);
-                    }
 
-                    List<Review> reviews = reviewService.findReviewsByfilter(r -> r.getRating() == request.getId());
-
-                    ServerResponse<List<Review>> response =
-                            ServerResponse.success("Filtered reviews retrieved successfully", reviews);
-
+            if ("filterByRating".equalsIgnoreCase(action)) {
+                if (request.getId() == null) {
+                    ServerResponse<String> response =
+                            ServerResponse.error("Rating value is required");
                     return mapper.writeValueAsString(response);
                 }
 
-                // Filter reviews by customer ID
-                if ("filterByCustomer".equalsIgnoreCase(action)) {
-                    if (request.getId() == null) {
-                        ServerResponse<String> response =
-                                ServerResponse.error("Customer ID is required");
-                        return mapper.writeValueAsString(response);
-                    }
+                List<Review> reviews =
+                        reviewService.findReviewsByfilter(r -> r.getRating() == request.getId());
 
-                    List<Review> reviews = reviewService.findReviewsByfilter(r -> r.getCustomerId() == request.getId());
+                ServerResponse<List<Review>> response =
+                        ServerResponse.success("Filtered reviews retrieved successfully", reviews);
 
-                    ServerResponse<List<Review>> response =
-                            ServerResponse.success("Customer reviews retrieved successfully", reviews);
-
-                    return mapper.writeValueAsString(response);
-                }
-
-                // Filter reviews by product ID
-                if ("filterByProduct".equalsIgnoreCase(action)) {
-                    if (request.getId() == null) {
-                        ServerResponse<String> response =
-                                ServerResponse.error("Product ID is required");
-                        return mapper.writeValueAsString(response);
-                    }
-
-                    List<Review> reviews = reviewService.findReviewsByfilter(r -> r.getProductId() == request.getId());
-
-                    ServerResponse<List<Review>> response =
-                            ServerResponse.success("Product reviews retrieved successfully", reviews);
-
-                    return mapper.writeValueAsString(response);
-                }
-
+                return mapper.writeValueAsString(response);
             }
         }
 
-        // If the request does not match any supported action/entity error message
-        ServerResponse<String> response = ServerResponse.error("Unsupported action or entity");
-        return mapper.writeValueAsString(response);
-    }
+            // If the request does not match any supported action/entity error message
+            ServerResponse<String> response = ServerResponse.error("Unsupported action or entity");
+            return mapper.writeValueAsString(response);
+        }
+
+
 }
+
 
 
 
