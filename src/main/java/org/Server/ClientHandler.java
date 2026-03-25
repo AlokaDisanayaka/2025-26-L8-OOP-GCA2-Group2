@@ -77,26 +77,22 @@ public class ClientHandler implements Runnable
             // Read one line of JSON sent by the client
             String requestJson = in.readLine();
 
-            if (requestJson == null || requestJson.trim().isEmpty()) {
-                ServerResponse<String> response =
-                        ServerResponse.error("Empty request received");
+            if (requestJson == null || requestJson.trim().isEmpty())
+            {
+                ServerResponse<String> response = ServerResponse.error("Empty request received");
 
                 out.println(mapper.writeValueAsString(response));
                 return;
             }
 
-            // Convert JSON text into a RequestMessage object
+            // Convert JSON text into a ClientRequest object
             ClientRequest request = mapper.readValue(requestJson, ClientRequest.class);
 
-            // confirm that the server received the request
-            String message = "Request received successfully. Action = " +
-                    request.getAction() + ", Entity = " + request.getEntity();
-
-            ServerResponse<String> response =
-                    ServerResponse.success(message, null);
+            // Send request to the request handler
+            String responseJson = handleRequest(request);
 
             // Send JSON response back to client
-            out.println(mapper.writeValueAsString(response));
+            out.println(responseJson);
 
         }
         catch (Exception e)
@@ -105,9 +101,8 @@ public class ClientHandler implements Runnable
             {
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-                // Clean and clear  error message
-                ServerResponse<String> errorResponse =
-                        ServerResponse.error("Server error: " + e.getMessage());
+                // Clean and clear error message.....
+                ServerResponse<String> errorResponse = ServerResponse.error("Server error: " + e.getMessage());
 
                 out.println(mapper.writeValueAsString(errorResponse));
 
@@ -117,14 +112,14 @@ public class ClientHandler implements Runnable
                 System.out.println("Error sending error response: " + ioException.getMessage());
             }
 
-            //  full error only on server side
+            // full error only on server side
             System.out.println("Server exception:");
             e.printStackTrace();
 
         }
         finally
         {
-            // always close the socket when finished..
+            // always close the socket when finished
             try
             {
                 clientSocket.close();
