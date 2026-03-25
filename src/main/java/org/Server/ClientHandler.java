@@ -215,7 +215,7 @@ public class ClientHandler implements Runnable {
 
         if ("review".equalsIgnoreCase(entity)) {
 
-            // Get all reviews - MY PART ADDED
+            // Get all reviews -
             if ("getAll".equalsIgnoreCase(action)) {
                 List<Review> reviews = reviewService.getallReviews();
 
@@ -303,6 +303,55 @@ public class ClientHandler implements Runnable {
                             ServerResponse.error("Review not found or could not be deleted");
                     return mapper.writeValueAsString(response);
                 }
+
+                // Filter reviews by rating
+                if ("filterByRating".equalsIgnoreCase(action)) {
+                    if (request.getId() == null) {
+                        ServerResponse<String> response =
+                                ServerResponse.error("Rating value is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    List<Review> reviews = reviewService.findReviewsByfilter(r -> r.getRating() == request.getId());
+
+                    ServerResponse<List<Review>> response =
+                            ServerResponse.success("Filtered reviews retrieved successfully", reviews);
+
+                    return mapper.writeValueAsString(response);
+                }
+
+                // Filter reviews by customer ID
+                if ("filterByCustomer".equalsIgnoreCase(action)) {
+                    if (request.getId() == null) {
+                        ServerResponse<String> response =
+                                ServerResponse.error("Customer ID is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    List<Review> reviews = reviewService.findReviewsByfilter(r -> r.getCustomerId() == request.getId());
+
+                    ServerResponse<List<Review>> response =
+                            ServerResponse.success("Customer reviews retrieved successfully", reviews);
+
+                    return mapper.writeValueAsString(response);
+                }
+
+                // Filter reviews by product ID
+                if ("filterByProduct".equalsIgnoreCase(action)) {
+                    if (request.getId() == null) {
+                        ServerResponse<String> response =
+                                ServerResponse.error("Product ID is required");
+                        return mapper.writeValueAsString(response);
+                    }
+
+                    List<Review> reviews = reviewService.findReviewsByfilter(r -> r.getProductId() == request.getId());
+
+                    ServerResponse<List<Review>> response =
+                            ServerResponse.success("Product reviews retrieved successfully", reviews);
+
+                    return mapper.writeValueAsString(response);
+                }
+
             }
         }
 
