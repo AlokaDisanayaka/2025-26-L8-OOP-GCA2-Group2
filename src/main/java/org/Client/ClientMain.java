@@ -1,11 +1,8 @@
 package org.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.DTO.Customer;
-import org.DTO.Product;
-import org.DTO.Orders;
-import org.DTO.OrderItem;
+import org.DTO.*;
 import org.Interface.ClientRequest;
+import org.Interface.ObjectMapperProvider;
 import org.Interface.ServerResponse;
 
 import java.io.BufferedReader;
@@ -16,13 +13,11 @@ import java.net.Socket;
 //testing client
 public class ClientMain
 {
-    //For Orders to use LocalDateTime
-    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
-
-    public static void main(String[] args) {
-
-        ObjectMapper mapper = new ObjectMapper();
-        try {
+    public static void main(String[] args)
+    {
+        ObjectMapper mapper = ObjectMapperProvider.getMapper();
+        try
+        {
             // Test different requests one by one
             //CUSTOMER
             //-------------------------------------------------------------
@@ -72,12 +67,12 @@ public class ClientMain
 
             //insert new order
             Orders newOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.NEW);
-            String orderJson = MAPPER.writeValueAsString(newOrder);
+            String orderJson = mapper.writeValueAsString(newOrder);
             sendRequest(new ClientRequest("insert", "orders", null, orderJson));
 
             //update order
             Orders updatedOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.PAID);
-            String updatedOrderJson = MAPPER.writeValueAsString(updatedOrder);
+            String updatedOrderJson = mapper.writeValueAsString(updatedOrder);
             sendRequest(new ClientRequest("update", "orders", 1, updatedOrderJson));
 
             //delete order
@@ -104,6 +99,42 @@ public class ClientMain
             //delete order item
             sendRequest(new ClientRequest("delete", "orderitem", 1, null));
 
+
+            // REVIEW
+            //-------------------------------------------------------------
+            // testing get all reviews
+            sendRequest(new ClientRequest("getAll", "review", null, null));
+
+            // testing get review by id
+            sendRequest(new ClientRequest("getById", "review", 1, null));
+            // testing add review
+            Review newReview = new Review(
+                    1, // customerId
+                    1, // productId
+                    5, // rating
+                    "Server test review",
+                    new java.sql.Timestamp(System.currentTimeMillis())
+            );
+            String reviewJson = mapper.writeValueAsString(newReview);
+            sendRequest(new ClientRequest("insert", "review", null, reviewJson));
+
+            // testing update review
+            Review updatedReview = new Review(
+                    1, // customerId
+                    1, // productId
+                    4, // rating
+                    "Updated server review",
+                    new java.sql.Timestamp(System.currentTimeMillis())
+            );
+            String updatedReviewJson = mapper.writeValueAsString(updatedReview);
+            sendRequest(new ClientRequest("update", "review", 1, updatedReviewJson));
+
+            // testing delete review by id
+            sendRequest(new ClientRequest("delete", "review", 1, null));
+
+            // testing filter reviews by rating
+            sendRequest(new ClientRequest("filterByRating", "review", 5, null));
+
         }
         catch (Exception e)
         {
@@ -120,17 +151,15 @@ public class ClientMain
      * then closes the connection.
      * .....................................
      */
-    public static void sendRequest(ClientRequest request) {
-
+    public static void sendRequest(ClientRequest request)
+    {
         try (
                 Socket socket = new Socket("localhost", 5000);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream())
-                )
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
         )
         {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = ObjectMapperProvider.getMapper();
 
             // converting  the request object into JSON
             String requestJson = mapper.writeValueAsString(request);

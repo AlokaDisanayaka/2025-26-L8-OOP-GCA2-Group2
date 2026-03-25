@@ -1,5 +1,4 @@
 package org.Server;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.DAO.CustomerDao;
 import org.DAO.ProductDao;
@@ -74,7 +73,6 @@ public class ClientHandler implements Runnable
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
         )
         {
-            // Read one line of JSON sent by the client
             String requestJson = in.readLine();
 
             if (requestJson == null || requestJson.trim().isEmpty())
@@ -85,13 +83,26 @@ public class ClientHandler implements Runnable
                 return;
             }
 
-            // Convert JSON text into a ClientRequest object
+            // log REQUEST on the server
+            System.out.println("\n=== NEW REQUEST RECEIVED ===");
+            System.out.println("Raw JSON: " + requestJson);
+
             ClientRequest request = mapper.readValue(requestJson, ClientRequest.class);
 
-            // Send request to the request handler
+            // log PARSED DATA
+            System.out.println("Parsed Request:");
+            System.out.println("Action: " + request.getAction());
+            System.out.println("Entity: " + request.getEntity());
+            System.out.println("ID: " + request.getId());
+
+            // Process request
             String responseJson = handleRequest(request);
 
-            // Send JSON response back to client
+            //log the response
+            System.out.println("Response being sent:");
+            System.out.println(responseJson);
+            System.out.println("=== END REQUEST ===\n");
+
             out.println(responseJson);
 
         }
@@ -101,25 +112,20 @@ public class ClientHandler implements Runnable
             {
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-                // Clean and clear error message.....
                 ServerResponse<String> errorResponse = ServerResponse.error("Server error: " + e.getMessage());
 
                 out.println(mapper.writeValueAsString(errorResponse));
-
             }
             catch (IOException ioException)
             {
                 System.out.println("Error sending error response: " + ioException.getMessage());
             }
 
-            // full error only on server side
             System.out.println("Server exception:");
             e.printStackTrace();
-
         }
         finally
         {
-            // always close the socket when finished
             try
             {
                 clientSocket.close();
@@ -131,7 +137,6 @@ public class ClientHandler implements Runnable
             }
         }
     }
-
 
     // the method handles one request and returns a JSON response string.
     private String handleRequest(ClientRequest request) throws Exception {
