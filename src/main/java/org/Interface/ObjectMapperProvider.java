@@ -1,12 +1,25 @@
 package org.Interface;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-// shared ObjectMapper
-public class ObjectMapperProvider {
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+public class ObjectMapperProvider
+{
+    private static final ObjectMapper mapper = createMapper();
 
-    public static ObjectMapper getMapper() {
+    private static ObjectMapper createMapper()
+    {
+        ObjectMapper mapper = new ObjectMapper();
+
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        return mapper;
+    }
+
+    public static ObjectMapper getMapper()
+    {
         return mapper;
     }
 }
