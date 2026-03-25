@@ -1,10 +1,7 @@
 package org.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.DTO.Customer;
-import org.DTO.Product;
-import org.DTO.Orders;
-import org.DTO.OrderItem;
+import org.DTO.*;
 import org.Interface.ClientRequest;
 import org.Interface.ServerResponse;
 
@@ -104,6 +101,41 @@ public class ClientMain
             //delete order item
             sendRequest(new ClientRequest("delete", "orderitem", 1, null));
 
+
+            // REVIEW
+            //-------------------------------------------------------------
+            // testing get all reviews
+            sendRequest(new ClientRequest("getAll", "review", null, null));
+
+            // testing get review by id
+            sendRequest(new ClientRequest("getById", "review", 1, null));
+            // testing add review
+            Review newReview = new Review(
+                    1, // customerId
+                    1, // productId
+                    5, // rating
+                    "Server test review",
+                    new java.sql.Timestamp(System.currentTimeMillis())
+            );
+            String reviewJson = mapper.writeValueAsString(newReview);
+            sendRequest(new ClientRequest("insert", "review", null, reviewJson));
+
+            // testing update review
+            Review updatedReview = new Review(
+                    1, // customerId
+                    1, // productId
+                    4, // rating
+                    "Updated server review",
+                    new java.sql.Timestamp(System.currentTimeMillis())
+            );
+            String updatedReviewJson = mapper.writeValueAsString(updatedReview);
+            sendRequest(new ClientRequest("update", "review", 1, updatedReviewJson));
+
+            // testing delete review by id
+            sendRequest(new ClientRequest("delete", "review", 1, null));
+
+           // testing filter reviews by rating
+            sendRequest(new ClientRequest("filterByRating", "review", 5, null));
         }
         catch (Exception e)
         {
