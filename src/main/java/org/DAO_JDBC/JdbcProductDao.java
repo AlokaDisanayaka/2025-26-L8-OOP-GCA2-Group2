@@ -39,7 +39,7 @@ public class JdbcProductDao implements ProductDao {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error retrieving products", e);
+            throw new RuntimeException("Database error while retrieving products", e);
         }
 
         return products;
@@ -72,7 +72,7 @@ public class JdbcProductDao implements ProductDao {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error retrieving product by ID", e);
+            throw new RuntimeException("Database error while retrieving product by ID", e);
         }
 
         return Optional.empty();   // never return null (Stage 1 requirement)
@@ -110,7 +110,7 @@ public class JdbcProductDao implements ProductDao {
             throw new RuntimeException("Insert successful but no ID returned");
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error inserting product", e);
+            throw new RuntimeException("Database error while inserting product", e);
         }
     }
 
@@ -143,7 +143,7 @@ public class JdbcProductDao implements ProductDao {
             );
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating product", e);
+            throw new RuntimeException("Database error while updating product", e);
         }
     }
 
@@ -161,7 +161,7 @@ public class JdbcProductDao implements ProductDao {
             return rows > 0;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting product", e);
+            throw new RuntimeException("Database error while deleting product", e);
         }
     }
 

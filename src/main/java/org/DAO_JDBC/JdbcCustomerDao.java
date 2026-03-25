@@ -14,7 +14,8 @@ import java.util.function.Predicate;
 public class JdbcCustomerDao implements CustomerDao {
 
     @Override
-    public List<Customer> getAllCustomers() {
+    public List<Customer> getAllCustomers()
+    {
         List<Customer> customers = new ArrayList<>();
 
         String sql = "SELECT customer_id, name, email, phone FROM customer";
@@ -37,23 +38,27 @@ public class JdbcCustomerDao implements CustomerDao {
         }
         catch (SQLException e)
         {
-            throw new RuntimeException("Error getting all customers", e);
+            throw new RuntimeException("Database error while getting all customers", e);
         }
 
         return customers;
     }
 
     @Override
-    public Optional<Customer> getCustomerById(int id) {
+    public Optional<Customer> getCustomerById(int id)
+    {
         String sql = "SELECT customer_id, name, email, phone FROM customer WHERE customer_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
 
             ps.setInt(1, id);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if (rs.next())
+                {
                     Customer c = new Customer(
                             rs.getInt("customer_id"),
                             rs.getString("name"),
@@ -64,31 +69,38 @@ public class JdbcCustomerDao implements CustomerDao {
                 }
             }
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Error getting customer by id", e);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error getting customer by id", e);
         }
 
         return Optional.empty();
     }
 
     @Override
-    public boolean deleteCustomerById(int id) {
+    public boolean deleteCustomerById(int id)
+    {
         String sql = "DELETE FROM customer WHERE customer_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
 
             ps.setInt(1, id);
             int rows = ps.executeUpdate();
             return rows > 0;
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Error deleting customer", e);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while deleting customer", e);
         }
     }
 
     @Override
-    public Customer insertCustomer(Customer customer) {
+    public Customer insertCustomer(Customer customer)
+    {
         String sql = "INSERT INTO customer (name, email, phone) VALUES (?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
@@ -100,8 +112,11 @@ public class JdbcCustomerDao implements CustomerDao {
 
             ps.executeUpdate();
 
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
+            try (ResultSet keys = ps.getGeneratedKeys())
+            {
+                if (keys.next())
+                {
+
                     int newId = keys.getInt(1);
                     return new Customer(newId, customer.getName(), customer.getEmail(), customer.getPhone());
                 }
@@ -109,17 +124,21 @@ public class JdbcCustomerDao implements CustomerDao {
 
             throw new RuntimeException("Insert worked but no ID returned");
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Error inserting customer", e);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while inserting customer", e);
         }
     }
 
     @Override
-    public Customer updateCustomer(int id, Customer customer) {
+    public Customer updateCustomer(int id, Customer customer)
+    {
         String sql = "UPDATE customer SET name = ?, email = ?, phone = ? WHERE customer_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
 
             ps.setString(1, customer.getName());
             ps.setString(2, customer.getEmail());
@@ -127,14 +146,17 @@ public class JdbcCustomerDao implements CustomerDao {
             ps.setInt(4, id);
 
             int rows = ps.executeUpdate();
-            if (rows == 0) {
+            if (rows == 0)
+            {
                 throw new RuntimeException("No customer found with id " + id);
             }
 
             return new Customer(id, customer.getName(), customer.getEmail(), customer.getPhone());
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Error updating customer", e);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while updating customer", e);
         }
     }
 

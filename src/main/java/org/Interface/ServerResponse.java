@@ -36,7 +36,7 @@ public class ServerResponse<T> {
     }
 
 
-    // method for error responses
+    // method for error responses- failure:
 
     public static <T> ServerResponse<T> error(String message)
     {
