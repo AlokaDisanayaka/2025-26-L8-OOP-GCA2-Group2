@@ -39,10 +39,10 @@ public class OrderItem
         setProductId(productId);
         setQuantity(quantity);
         setUnitPriceAtTime(unitPriceAtTime);
-        this.fileData = fileData;
-        this.fileName = fileName;
-        this.contentType = contentType;
-        this.fileSize = fileSize;
+        setFileData(fileData);
+        setFileName(fileName);
+        setContentType(contentType);
+        setFileSize(fileSize);
     }
 
     public OrderItem()
@@ -128,6 +128,10 @@ public class OrderItem
 
     public void setFileData(byte[] fileData)
     {
+        if (fileData == null || fileData.length == 0)
+        {
+            throw new IllegalArgumentException("File data cannot be null or empty");
+        }
         this.fileData = fileData;
     }
 
@@ -138,6 +142,10 @@ public class OrderItem
 
     public void setFileName(String fileName)
     {
+        if (fileName == null || fileName.trim().isEmpty())
+        {
+            throw new IllegalArgumentException("File name cannot be null or empty");
+        }
         this.fileName = fileName;
     }
 
@@ -148,6 +156,10 @@ public class OrderItem
 
     public void setContentType(String contentType)
     {
+        if (contentType == null || contentType.trim().isEmpty())
+        {
+            throw new IllegalArgumentException("Content type cannot be null or empty");
+        }
         this.contentType = contentType;
     }
 
@@ -158,6 +170,10 @@ public class OrderItem
 
     public void setFileSize(int fileSize)
     {
+        if (fileSize < 0)
+        {
+            throw new IllegalArgumentException("File size must be 0 or greater");
+        }
         this.fileSize = fileSize;
     }
 }
