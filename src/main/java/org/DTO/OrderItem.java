@@ -7,6 +7,11 @@ public class OrderItem
     private int productId;
     private int quantity;
     private double unitPriceAtTime;
+    //Binary Schema Extension
+    private byte[] fileData;         
+    private String fileName;
+    private String contentType;
+    private int fileSize;
 
     //Constructors
     public OrderItem(int orderItemId, int orderId, int productId, int quantity, double unitPriceAtTime)
@@ -24,6 +29,22 @@ public class OrderItem
         setQuantity(quantity);
         setUnitPriceAtTime(unitPriceAtTime);
     }
+
+    //Binary Schema Extension
+    public OrderItem(int orderItemId, int orderId, int productId, int quantity, double unitPriceAtTime,
+                     byte[] fileData, String fileName, String contentType, int fileSize)
+    {
+        setOrderItemId(orderItemId);
+        setOrderId(orderId);
+        setProductId(productId);
+        setQuantity(quantity);
+        setUnitPriceAtTime(unitPriceAtTime);
+        this.fileData = fileData;
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.fileSize = fileSize;
+    }
+
     public OrderItem()
     {
     }
@@ -36,7 +57,7 @@ public class OrderItem
 
     public void setOrderItemId(int orderItemId)
     {
-        if (orderItemId < 0)
+        if (orderItemId <= 0)
         {
             throw new IllegalArgumentException("OrderItemId must be greater than 0");
         }
@@ -97,6 +118,47 @@ public class OrderItem
             throw new IllegalArgumentException("UnitPriceAtTime must be 0 or greater");
         }
         this.unitPriceAtTime = unitPriceAtTime;
+    }
+
+    //Binary Schema Extension
+    public byte[] getFileData()
+    {
+        return fileData;
+    }
+
+    public void setFileData(byte[] fileData)
+    {
+        this.fileData = fileData;
+    }
+
+    public String getFileName()
+    {
+        return fileName;
+    }
+
+    public void setFileName(String fileName)
+    {
+        this.fileName = fileName;
+    }
+
+    public String getContentType()
+    {
+        return contentType;
+    }
+
+    public void setContentType(String contentType)
+    {
+        this.contentType = contentType;
+    }
+
+    public int getFileSize()
+    {
+        return fileSize;
+    }
+
+    public void setFileSize(int fileSize)
+    {
+        this.fileSize = fileSize;
     }
 }
 
