@@ -16,7 +16,7 @@ public class JdbcOrderItemDao implements OrderItemDao
     {
         List<OrderItem> items = new ArrayList<>();
 
-        String sql = "SELECT order_item_id, order_id, product_id, quantity, unit_price_at_time FROM orderitem";
+        String sql = "SELECT order_item_id, order_id, product_id, quantity, unit_price_at_time, file_data, file_name, content_type, file_size FROM orderitem";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -29,7 +29,12 @@ public class JdbcOrderItemDao implements OrderItemDao
                         rs.getInt("order_id"),
                         rs.getInt("product_id"),
                         rs.getInt("quantity"),
-                        rs.getDouble("unit_price_at_time")
+                        rs.getDouble("unit_price_at_time"),
+
+                        rs.getBytes("file_data"),
+                        rs.getString("file_name"),
+                        rs.getString("content_type"),
+                        rs.getInt("file_size")
                 ));
             }
         }
@@ -44,7 +49,7 @@ public class JdbcOrderItemDao implements OrderItemDao
     @Override
     public Optional<OrderItem> getOrderItemById(int id)
     {
-        String sql = "SELECT order_item_id, order_id, product_id, quantity, unit_price_at_time FROM orderitem WHERE order_item_id = ?";
+        String sql = "SELECT order_item_id, order_id, product_id, quantity, unit_price_at_time, file_data, file_name, content_type, file_size FROM orderitem WHERE order_item_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql))
@@ -60,7 +65,12 @@ public class JdbcOrderItemDao implements OrderItemDao
                             rs.getInt("order_id"),
                             rs.getInt("product_id"),
                             rs.getInt("quantity"),
-                            rs.getDouble("unit_price_at_time")
+                            rs.getDouble("unit_price_at_time"),
+
+                            rs.getBytes("file_data"),
+                            rs.getString("file_name"),
+                            rs.getString("content_type"),
+                            rs.getInt("file_size")
                     ));
                 }
             }
@@ -79,7 +89,7 @@ public class JdbcOrderItemDao implements OrderItemDao
     {
         List<OrderItem> items = new ArrayList<>();
 
-        String sql = "SELECT order_item_id, order_id, product_id, quantity, unit_price_at_time FROM orderitem WHERE order_id = ?";
+        String sql = "SELECT order_item_id, order_id, product_id, quantity, unit_price_at_time, file_data, file_name, content_type, file_size FROM orderitem WHERE order_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql))
@@ -95,7 +105,12 @@ public class JdbcOrderItemDao implements OrderItemDao
                             rs.getInt("order_id"),
                             rs.getInt("product_id"),
                             rs.getInt("quantity"),
-                            rs.getDouble("unit_price_at_time")
+                            rs.getDouble("unit_price_at_time"),
+
+                            rs.getBytes("file_data"),
+                            rs.getString("file_name"),
+                            rs.getString("content_type"),
+                            rs.getInt("file_size")
                     ));
                 }
             }
@@ -131,7 +146,7 @@ public class JdbcOrderItemDao implements OrderItemDao
     public OrderItem insertOrderItem(OrderItem item)
     {
 
-        String sql = "INSERT INTO orderitem (order_id, product_id, quantity, unit_price_at_time) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO orderitem (order_id, product_id, quantity, unit_price_at_time, file_data, file_name, content_type, file_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
@@ -140,6 +155,11 @@ public class JdbcOrderItemDao implements OrderItemDao
             ps.setInt(2, item.getProductId());
             ps.setInt(3, item.getQuantity());
             ps.setDouble(4, item.getUnitPriceAtTime());
+
+            ps.setBytes(5, item.getFileData());
+            ps.setString(6, item.getFileName());
+            ps.setString(7, item.getContentType());
+            ps.setInt(8, item.getFileSize());
 
             ps.executeUpdate();
 
@@ -154,7 +174,12 @@ public class JdbcOrderItemDao implements OrderItemDao
                             item.getOrderId(),
                             item.getProductId(),
                             item.getQuantity(),
-                            item.getUnitPriceAtTime()
+                            item.getUnitPriceAtTime(),
+
+                            item.getFileData(),
+                            item.getFileName(),
+                            item.getContentType(),
+                            item.getFileSize()
                     );
                 }
             }
@@ -170,7 +195,7 @@ public class JdbcOrderItemDao implements OrderItemDao
     @Override
     public OrderItem updateOrderItem(int id, OrderItem item)
     {
-        String sql = "UPDATE orderitem SET order_id=?, product_id=?, quantity=?, unit_price_at_time=? WHERE order_item_id=?";
+        String sql = "UPDATE orderitem SET order_id=?, product_id=?, quantity=?, unit_price_at_time=?, file_data=?, file_name=?, content_type=?, file_size=? WHERE order_item_id=?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql))
@@ -179,7 +204,13 @@ public class JdbcOrderItemDao implements OrderItemDao
             ps.setInt(2, item.getProductId());
             ps.setInt(3, item.getQuantity());
             ps.setDouble(4, item.getUnitPriceAtTime());
-            ps.setInt(5, id);
+
+            ps.setBytes(5, item.getFileData());
+            ps.setString(6, item.getFileName());
+            ps.setString(7, item.getContentType());
+            ps.setInt(8, item.getFileSize());
+
+            ps.setInt(9, id);
 
             int rows = ps.executeUpdate();
 
@@ -193,7 +224,12 @@ public class JdbcOrderItemDao implements OrderItemDao
                     item.getOrderId(),
                     item.getProductId(),
                     item.getQuantity(),
-                    item.getUnitPriceAtTime()
+                    item.getUnitPriceAtTime(),
+
+                    item.getFileData(),
+                    item.getFileName(),
+                    item.getContentType(),
+                    item.getFileSize()
             );
         }
         catch (SQLException e)
