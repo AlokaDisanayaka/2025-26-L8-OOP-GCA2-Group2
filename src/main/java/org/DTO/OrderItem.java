@@ -128,11 +128,7 @@ public class OrderItem
 
     public void setFileData(byte[] fileData)
     {
-        if (fileData == null || fileData.length == 0)
-        {
-            throw new IllegalArgumentException("File data cannot be null or empty");
-        }
-        this.fileData = fileData;
+        this.fileData = fileData; //allow null
     }
 
     public String getFileName()
@@ -142,11 +138,7 @@ public class OrderItem
 
     public void setFileName(String fileName)
     {
-        if (fileName == null || fileName.trim().isEmpty())
-        {
-            throw new IllegalArgumentException("File name cannot be null or empty");
-        }
-        this.fileName = fileName;
+        this.fileName = (fileName == null) ? "" : fileName.trim();
     }
 
     public String getContentType()
@@ -156,11 +148,7 @@ public class OrderItem
 
     public void setContentType(String contentType)
     {
-        if (contentType == null || contentType.trim().isEmpty())
-        {
-            throw new IllegalArgumentException("Content type cannot be null or empty");
-        }
-        this.contentType = contentType;
+        this.contentType = (contentType == null) ? "" : contentType.trim();
     }
 
     public int getFileSize()
@@ -170,11 +158,7 @@ public class OrderItem
 
     public void setFileSize(int fileSize)
     {
-        if (fileSize < 0)
-        {
-            throw new IllegalArgumentException("File size must be 0 or greater");
-        }
-        this.fileSize = fileSize;
+        this.fileSize = Math.max(0, fileSize);
     }
 }
 
