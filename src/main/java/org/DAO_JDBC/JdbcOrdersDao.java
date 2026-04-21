@@ -16,7 +16,7 @@ public class JdbcOrdersDao implements OrdersDao
     {
         List<Orders> orders = new ArrayList<>();
 
-        String sql = "SELECT order_id, customer_id, order_date, status FROM orders";
+        String sql = "SELECT order_id, customer_id, order_date, status, file_data, file_name, content_type, file_size FROM orders";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -28,7 +28,12 @@ public class JdbcOrdersDao implements OrdersDao
                         rs.getInt("order_id"),
                         rs.getInt("customer_id"),
                         rs.getTimestamp("order_date").toLocalDateTime(),
-                        Orders.OrderStatus.valueOf(rs.getString("status"))
+                        Orders.OrderStatus.valueOf(rs.getString("status")),
+
+                        rs.getBytes("file_data"),
+                        rs.getString("file_name"),
+                        rs.getString("content_type"),
+                        rs.getInt("file_size")
                 ));
             }
         }
@@ -43,7 +48,7 @@ public class JdbcOrdersDao implements OrdersDao
     @Override
     public Optional<Orders> getOrderById(int id)
     {
-        String sql = "SELECT order_id, customer_id, order_date, status FROM orders WHERE order_id = ?";
+        String sql = "SELECT order_id, customer_id, order_date, status, file_data, file_name, content_type, file_size FROM orders WHERE order_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql))
@@ -58,7 +63,12 @@ public class JdbcOrdersDao implements OrdersDao
                             rs.getInt("order_id"),
                             rs.getInt("customer_id"),
                             rs.getTimestamp("order_date").toLocalDateTime(),
-                            Orders.OrderStatus.valueOf(rs.getString("status"))
+                            Orders.OrderStatus.valueOf(rs.getString("status")),
+
+                            rs.getBytes("file_data"),
+                            rs.getString("file_name"),
+                            rs.getString("content_type"),
+                            rs.getInt("file_size")
                     ));
                 }
             }
@@ -76,7 +86,7 @@ public class JdbcOrdersDao implements OrdersDao
     {
         List<Orders> orders = new ArrayList<>();
 
-        String sql = "SELECT order_id, customer_id, order_date, status FROM orders WHERE customer_id = ?";
+        String sql = "SELECT order_id, customer_id, order_date, status, file_data, file_name, content_type, file_size FROM orders WHERE customer_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql))
@@ -91,7 +101,12 @@ public class JdbcOrdersDao implements OrdersDao
                             rs.getInt("order_id"),
                             rs.getInt("customer_id"),
                             rs.getTimestamp("order_date").toLocalDateTime(),
-                            Orders.OrderStatus.valueOf(rs.getString("status"))
+                            Orders.OrderStatus.valueOf(rs.getString("status")),
+
+                            rs.getBytes("file_data"),
+                            rs.getString("file_name"),
+                            rs.getString("content_type"),
+                            rs.getInt("file_size")
                     ));
                 }
             }
@@ -126,7 +141,7 @@ public class JdbcOrdersDao implements OrdersDao
     @Override
     public Orders insertOrder(Orders order)
     {
-        String sql = "INSERT INTO orders (customer_id, order_date, status) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO orders (customer_id, order_date, status, file_data, file_name, content_type, file_size) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
@@ -134,6 +149,11 @@ public class JdbcOrdersDao implements OrdersDao
             ps.setInt(1, order.getCustomerId());
             ps.setTimestamp(2, Timestamp.valueOf(order.getOrderDate()));
             ps.setString(3, order.getStatus().name());
+
+            ps.setBytes(4, order.getFileData());
+            ps.setString(5, order.getFileName());
+            ps.setString(6, order.getContentType());
+            ps.setInt(7, order.getFileSize());
 
             ps.executeUpdate();
 
@@ -147,7 +167,12 @@ public class JdbcOrdersDao implements OrdersDao
                             newId,
                             order.getCustomerId(),
                             order.getOrderDate(),
-                            order.getStatus()
+                            order.getStatus(),
+
+                            order.getFileData(),
+                            order.getFileName(),
+                            order.getContentType(),
+                            order.getFileSize()
                     );
                 }
             }
@@ -163,7 +188,7 @@ public class JdbcOrdersDao implements OrdersDao
     @Override
     public Orders updateOrder(int id, Orders order)
     {
-        String sql = "UPDATE orders SET customer_id=?, order_date=?, status=? WHERE order_id=?";
+        String sql = "UPDATE orders SET customer_id=?, order_date=?, status=?, file_data=?, file_name=?, content_type=?, file_size=? WHERE order_id=?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql))
@@ -171,7 +196,13 @@ public class JdbcOrdersDao implements OrdersDao
             ps.setInt(1, order.getCustomerId());
             ps.setTimestamp(2, Timestamp.valueOf(order.getOrderDate()));
             ps.setString(3, order.getStatus().name());
-            ps.setInt(4, id);
+
+            ps.setBytes(4, order.getFileData());
+            ps.setString(5, order.getFileName());
+            ps.setString(6, order.getContentType());
+            ps.setInt(7, order.getFileSize());
+
+            ps.setInt(8, id);
 
             int rows = ps.executeUpdate();
 
@@ -184,7 +215,12 @@ public class JdbcOrdersDao implements OrdersDao
                     id,
                     order.getCustomerId(),
                     order.getOrderDate(),
-                    order.getStatus()
+                    order.getStatus(),
+
+                    order.getFileData(),
+                    order.getFileName(),
+                    order.getContentType(),
+                    order.getFileSize()
             );
 
         }
