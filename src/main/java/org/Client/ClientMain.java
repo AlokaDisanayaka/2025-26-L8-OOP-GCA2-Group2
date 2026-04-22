@@ -133,6 +133,9 @@ public class ClientMain
             String updatedItemJson = mapper.writeValueAsString(payloadUpdate);
             sendRequest(new ClientRequest("update", "orderitem", 1, updatedItemJson));
 
+            //metadata test
+            sendRequest(new ClientRequest("getMetadata", "orderitem", 1, null));
+
             //download
             sendRequest(new ClientRequest("download", "orderitem", 1, null));
 

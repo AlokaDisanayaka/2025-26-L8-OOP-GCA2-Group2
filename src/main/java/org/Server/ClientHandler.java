@@ -568,6 +568,32 @@ public class ClientHandler implements Runnable
             //-----------------------------------------------------------------------
             if ("orderitem".equalsIgnoreCase(entity))
             {
+                //metadata only request (returns only file metadata for an order item without downloading the BLOB)
+                if ("getMetadata".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem ID required"));
+                    }
+
+                    Optional<OrderItem> itemOpt = orderItemService.getOrderItemMetadataById(request.getId());
+
+                    if (itemOpt.isEmpty())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem not found"));
+                    }
+
+                    OrderItem item = itemOpt.get();
+
+                    //only return metadata fields
+                    java.util.Map<String, Object> meta = new java.util.HashMap<>();
+                    meta.put("fileName", item.getFileName());
+                    meta.put("contentType", item.getContentType());
+                    meta.put("fileSize", item.getFileSize());
+
+                    return mapper.writeValueAsString(ServerResponse.success("Metadata retrieved", meta));
+                }
+
                 if ("download".equalsIgnoreCase(action))
                 {
                     if (request.getId() == null)
