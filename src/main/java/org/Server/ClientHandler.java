@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -567,10 +568,40 @@ public class ClientHandler implements Runnable
             //-----------------------------------------------------------------------
             if ("orderitem".equalsIgnoreCase(entity))
             {
+                if ("download".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem ID required"));
+                    }
+
+                    Optional<OrderItem> itemOpt = orderItemService.getOrderItemById(request.getId());
+
+                    if (itemOpt.isEmpty() || itemOpt.get().getFileData() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("File not found"));
+                    }
+
+                    OrderItem item = itemOpt.get();
+                    String base64 = Base64.getEncoder().encodeToString(item.getFileData());
+
+                    java.util.Map<String, Object> payload = new java.util.HashMap<>();
+                    payload.put("fileName", item.getFileName());
+                    payload.put("contentType", item.getContentType());
+                    payload.put("fileData", base64);
+
+                    return mapper.writeValueAsString(ServerResponse.success("File retrieved", payload));
+                }
+
                 //Get all items
                 if ("getAll".equalsIgnoreCase(action))
                 {
                     List<OrderItem> items = orderItemService.getAllOrderItems();
+
+                    for (OrderItem item : items)
+                    {
+                        item.setFileData(null);
+                    }
 
                     return mapper.writeValueAsString(ServerResponse.success("Order items retrieved", items));
                 }
@@ -598,18 +629,58 @@ public class ClientHandler implements Runnable
                 //Insert
                 if ("insert".equalsIgnoreCase(action))
                 {
-                    OrderItem item = mapper.readValue(request.getJsonData(), OrderItem.class);
-                    OrderItem saved = orderItemService.addOrderItem(item);
+                    java.util.Map<String, Object> map = mapper.readValue(request.getJsonData(), java.util.Map.class);
 
+                    byte[] fileBytes = null;
+
+                    if (map.get("fileData") != null)
+                    {
+                        fileBytes = Base64.getDecoder().decode((String) map.get("fileData"));
+                    }
+
+                    OrderItem item = new OrderItem(0, (int) map.get("orderId"),
+                                                        (int) map.get("productId"),
+                                                        (int) map.get("quantity"),
+                                                        ((Number) map.get("unitPriceAtTime")).doubleValue());
+
+                    item.setFileData(fileBytes);
+                    item.setFileName((String) map.get("fileName"));
+                    item.setContentType((String) map.get("contentType"));
+                    item.setFileSize((int) map.get("fileSize"));
+
+                    OrderItem saved = orderItemService.addOrderItem(item);
                     return mapper.writeValueAsString(ServerResponse.success("OrderItem inserted", saved));
                 }
 
                 //Update
                 if ("update".equalsIgnoreCase(action))
                 {
-                    OrderItem item = mapper.readValue(request.getJsonData(), OrderItem.class);
-                    OrderItem updated = orderItemService.updateOrderItem(request.getId(), item);
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem ID is required for update"));
+                    }
 
+                    java.util.Map<String, Object> map = mapper.readValue(request.getJsonData(), java.util.Map.class);
+
+                    byte[] fileBytes = null;
+
+                    if (map.get("fileData") != null)
+                    {
+                        fileBytes = Base64.getDecoder().decode((String) map.get("fileData"));
+                    }
+
+                    OrderItem item = new OrderItem(request.getId(),
+                                                    (int) map.get("orderId"),
+                                                    (int) map.get("productId"),
+                                                    (int) map.get("quantity"),
+                                                    ((Number) map.get("unitPriceAtTime")).doubleValue());
+
+                    item.setFileData(fileBytes);
+                    item.setFileName((String) map.get("fileName"));
+                    item.setContentType((String) map.get("contentType"));
+                    item.setFileSize((int) map.get("fileSize"));
+
+                    OrderItem updated = orderItemService.updateOrderItem(request.getId(), item);
                     return mapper.writeValueAsString(ServerResponse.success("OrderItem updated", updated));
                 }
 
