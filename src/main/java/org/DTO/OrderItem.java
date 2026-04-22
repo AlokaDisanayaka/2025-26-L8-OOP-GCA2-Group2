@@ -57,9 +57,9 @@ public class OrderItem
 
     public void setOrderItemId(int orderItemId)
     {
-        if (orderItemId <= 0)
+        if (orderItemId < 0)
         {
-            throw new IllegalArgumentException("OrderItemId must be greater than 0");
+            throw new IllegalArgumentException("OrderItemId cannot be negative");
         }
         this.orderItemId = orderItemId;
     }
