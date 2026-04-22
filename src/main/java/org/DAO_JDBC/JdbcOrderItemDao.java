@@ -237,4 +237,45 @@ public class JdbcOrderItemDao implements OrderItemDao
             throw new RuntimeException("Error updating order item", e);
         }
     }
+
+    //Retrieves only metadata for an OrderItem without loading the BLOB (file_data) column.
+    @Override
+    public Optional<OrderItem> getOrderItemMetadataById(int id)
+    {
+        String sql = "SELECT order_item_id, order_id, product_id, quantity, unit_price_at_time, " +
+                        "file_name, content_type, file_size " +
+                        "FROM orderitem WHERE order_item_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if (rs.next())
+                {
+                    OrderItem item = new OrderItem(
+                            rs.getInt("order_item_id"),
+                            rs.getInt("order_id"),
+                            rs.getInt("product_id"),
+                            rs.getInt("quantity"),
+                            rs.getDouble("unit_price_at_time")
+                    );
+
+                    item.setFileName(rs.getString("file_name"));
+                    item.setContentType(rs.getString("content_type"));
+                    item.setFileSize(rs.getInt("file_size"));
+
+                    return Optional.of(item);
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Error getting order item metadata", e);
+        }
+
+        return Optional.empty();
+    }
 }
