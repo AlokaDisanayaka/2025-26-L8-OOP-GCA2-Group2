@@ -14,4 +14,6 @@ public interface OrderItemDao
     boolean deleteOrderItemById(int id);
     OrderItem insertOrderItem(OrderItem orderItem);
     OrderItem updateOrderItem(int id, OrderItem orderItem);
+
+    Optional<OrderItem> getOrderItemMetadataById(int id);
 }
