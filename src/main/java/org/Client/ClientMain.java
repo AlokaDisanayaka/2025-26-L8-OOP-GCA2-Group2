@@ -10,6 +10,13 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 //testing client
 public class ClientMain
 {
@@ -87,14 +94,47 @@ public class ClientMain
             sendRequest(new ClientRequest("getById", "orderitem", 1, null));
 
             //insert order item
+            byte[] fileBytes = readFile("C:/test/sample.png");
             OrderItem newItem = new OrderItem(1, 1, 2, 99.99);
-            String itemJson = mapper.writeValueAsString(newItem);
+            String base64File = Base64.getEncoder().encodeToString(fileBytes);
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("orderId", newItem.getOrderId());
+            payload.put("productId", newItem.getProductId());
+            payload.put("quantity", newItem.getQuantity());
+            payload.put("unitPriceAtTime", newItem.getUnitPriceAtTime());
+            payload.put("fileData", base64File);
+            payload.put("fileName", "sample.png");
+            payload.put("contentType", "image/png");
+            payload.put("fileSize", fileBytes.length);
+
+            String itemJson = mapper.writeValueAsString(payload);
             sendRequest(new ClientRequest("insert", "orderitem", null, itemJson));
 
             //update order item
             OrderItem updatedItem = new OrderItem(1, 1, 5, 89.99);
-            String updatedItemJson = mapper.writeValueAsString(updatedItem);
+
+            updatedItem.setFileData(fileBytes);
+            updatedItem.setFileName("sample.png");
+            updatedItem.setContentType("image/png");
+            updatedItem.setFileSize(fileBytes.length);
+            String base64FileUpdate = Base64.getEncoder().encodeToString(fileBytes);
+
+            Map<String, Object> payloadUpdate = new HashMap<>();
+            payloadUpdate.put("orderId", updatedItem.getOrderId());
+            payloadUpdate.put("productId", updatedItem.getProductId());
+            payloadUpdate.put("quantity", updatedItem.getQuantity());
+            payloadUpdate.put("unitPriceAtTime", updatedItem.getUnitPriceAtTime());
+            payloadUpdate.put("fileData", base64FileUpdate);
+            payloadUpdate.put("fileName", "sample.png");
+            payloadUpdate.put("contentType", "image/png");
+            payloadUpdate.put("fileSize", fileBytes.length);
+
+            String updatedItemJson = mapper.writeValueAsString(payloadUpdate);
             sendRequest(new ClientRequest("update", "orderitem", 1, updatedItemJson));
+
+            //download
+            sendRequest(new ClientRequest("download", "orderitem", 1, null));
 
             //delete order item
             sendRequest(new ClientRequest("delete", "orderitem", 1, null));
@@ -173,8 +213,36 @@ public class ClientMain
             // read the JSON response from the server
             String responseJson = in.readLine();
 
+            ServerResponse response = mapper.readValue(responseJson, ServerResponse.class);
+
             System.out.println("\nResponse from the Server:");
             System.out.println(responseJson);
+
+
+            //file download handling
+            if (response.getData() instanceof LinkedHashMap data)
+            {
+                Object fileDataObj = data.get("fileData");
+
+                if (fileDataObj != null)
+                {
+                    String base64 = (String) fileDataObj;
+                    String fileName = (String) data.get("fileName");
+
+                    byte[] decoded = Base64.getDecoder().decode(base64);
+
+                    java.nio.file.Path path = java.nio.file.Path.of(fileName);
+
+                    if (java.nio.file.Files.exists(path))
+                    {
+                        path = java.nio.file.Path.of("downloaded_" + System.currentTimeMillis() + "_" + fileName);
+                    }
+
+                    java.nio.file.Files.write(path, decoded);
+
+                    System.out.println("File saved as: " + path);
+                }
+            }
 
         }
         catch (Exception e)
@@ -182,5 +250,10 @@ public class ClientMain
             System.out.println("Client error: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public static byte[] readFile(String filePath) throws Exception
+    {
+        return Files.readAllBytes(Path.of(filePath));
     }
 }
