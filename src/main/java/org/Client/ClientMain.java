@@ -178,6 +178,9 @@ public class ClientMain
             // testing filter reviews by rating
             sendRequest(new ClientRequest("filterByRating", "review", 5, null));
 
+
+            //DISCONNECT client
+            sendRequest(new ClientRequest("disconnect", "client", null, null));
         }
         catch (Exception e)
         {

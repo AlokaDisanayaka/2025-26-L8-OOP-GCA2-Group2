@@ -106,6 +106,14 @@ public class ClientHandler implements Runnable
 
             out.println(responseJson);
 
+            //DISCONNECT request
+            if ("disconnect".equalsIgnoreCase(request.getAction()))
+            {
+                System.out.println("Client requested disconnect. Closing connection cleanly.");
+                clientSocket.close();
+                return;
+            }
+
         }
         catch (Exception e)
         {
