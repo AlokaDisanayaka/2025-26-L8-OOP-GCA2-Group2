@@ -229,4 +229,44 @@ public class JdbcOrdersDao implements OrdersDao
             throw new RuntimeException("Error updating order", e);
         }
     }
+
+    //Retrieves only metadata for an Orders without loading the BLOB (file_data) column.
+    @Override
+    public Optional<Orders> getOrdersMetadataById(int id)
+    {
+        String sql = "SELECT order_id, customer_id, order_date, status, " +
+                        "file_name, content_type, file_size " +
+                        "FROM orders WHERE order_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if (rs.next())
+                {
+                    Orders order = new Orders(
+                            rs.getInt("order_id"),
+                            rs.getInt("customer_id"),
+                            rs.getTimestamp("order_date").toLocalDateTime(),
+                            Orders.OrderStatus.valueOf(rs.getString("status"))
+                    );
+
+                    order.setFileName(rs.getString("file_name"));
+                    order.setContentType(rs.getString("content_type"));
+                    order.setFileSize(rs.getInt("file_size"));
+
+                    return Optional.of(order);
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Error getting order metadata by id", e);
+        }
+
+        return Optional.empty();
+    }
 }
