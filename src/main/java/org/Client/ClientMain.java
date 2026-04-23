@@ -81,7 +81,7 @@ public class ClientMain
             orderPayload.put("status", "NEW");
             orderPayload.put("fileData", orderBase64);
             orderPayload.put("fileName", "sample.png");
-            orderPayload.put("contentType", "img/png");
+            orderPayload.put("contentType", "image/png");
             orderPayload.put("fileSize", orderFile.length);
             String orderJson = mapper.writeValueAsString(orderPayload);
             sendRequest(new ClientRequest("insert", "orders", null, orderJson));
@@ -95,10 +95,13 @@ public class ClientMain
             orderUpdatePayload.put("status", "PAID");
             orderUpdatePayload.put("fileData", updatedOrderBase64);
             orderUpdatePayload.put("fileName", "sample.png");
-            orderUpdatePayload.put("contentType", "img/png");
+            orderUpdatePayload.put("contentType", "image/png");
             orderUpdatePayload.put("fileSize", updatedOrderFile.length);
             String updatedOrderJson = mapper.writeValueAsString(orderUpdatePayload);
             sendRequest(new ClientRequest("update", "orders", 1, updatedOrderJson));
+
+            //metadata test for orders
+            sendRequest(new ClientRequest("getMetadata", "orders", 1, null));
 
             //download test
             sendRequest(new ClientRequest("download", "orders", 1, null));
