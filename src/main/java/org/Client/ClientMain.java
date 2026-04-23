@@ -73,17 +73,38 @@ public class ClientMain
             sendRequest(new ClientRequest("getById", "orders", 1, null));
 
             //insert new order
-            Orders newOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.NEW);
-            String orderJson = mapper.writeValueAsString(newOrder);
+            byte[] orderFile = readFile("C:/test/sample.png");
+            String orderBase64 = Base64.getEncoder().encodeToString(orderFile);
+            Map<String, Object> orderPayload = new HashMap<>();
+            orderPayload.put("customerId", 1);
+            orderPayload.put("orderDate", java.time.LocalDateTime.now());
+            orderPayload.put("status", "NEW");
+            orderPayload.put("fileData", orderBase64);
+            orderPayload.put("fileName", "sample.png");
+            orderPayload.put("contentType", "img/png");
+            orderPayload.put("fileSize", orderFile.length);
+            String orderJson = mapper.writeValueAsString(orderPayload);
             sendRequest(new ClientRequest("insert", "orders", null, orderJson));
 
             //update order
-            Orders updatedOrder = new Orders(1, java.time.LocalDateTime.now(), Orders.OrderStatus.PAID);
-            String updatedOrderJson = mapper.writeValueAsString(updatedOrder);
+            byte[] updatedOrderFile = readFile("C:/test/sample.png");
+            String updatedOrderBase64 = Base64.getEncoder().encodeToString(updatedOrderFile);
+            Map<String, Object> orderUpdatePayload = new HashMap<>();
+            orderUpdatePayload.put("customerId", 1);
+            orderUpdatePayload.put("orderDate", java.time.LocalDateTime.now());
+            orderUpdatePayload.put("status", "PAID");
+            orderUpdatePayload.put("fileData", updatedOrderBase64);
+            orderUpdatePayload.put("fileName", "sample.png");
+            orderUpdatePayload.put("contentType", "img/png");
+            orderUpdatePayload.put("fileSize", updatedOrderFile.length);
+            String updatedOrderJson = mapper.writeValueAsString(orderUpdatePayload);
             sendRequest(new ClientRequest("update", "orders", 1, updatedOrderJson));
 
+            //download test
+            sendRequest(new ClientRequest("download", "orders", 1, null));
+
             //delete order
-            sendRequest(new ClientRequest("delete", "orders", 1, null));
+            sendRequest(new ClientRequest("delete", "orders", 1, null)); //will fail because order item rows referenced the orders row via a foreign key (MySQL prevented deletion)
 
             // ORDER ITEMS
             //-------------------------------------------------------------
@@ -97,7 +118,6 @@ public class ClientMain
             byte[] fileBytes = readFile("C:/test/sample.png");
             OrderItem newItem = new OrderItem(1, 1, 2, 99.99);
             String base64File = Base64.getEncoder().encodeToString(fileBytes);
-
             Map<String, Object> payload = new HashMap<>();
             payload.put("orderId", newItem.getOrderId());
             payload.put("productId", newItem.getProductId());
@@ -107,19 +127,16 @@ public class ClientMain
             payload.put("fileName", "sample.png");
             payload.put("contentType", "image/png");
             payload.put("fileSize", fileBytes.length);
-
             String itemJson = mapper.writeValueAsString(payload);
             sendRequest(new ClientRequest("insert", "orderitem", null, itemJson));
 
             //update order item
             OrderItem updatedItem = new OrderItem(1, 1, 5, 89.99);
-
             updatedItem.setFileData(fileBytes);
             updatedItem.setFileName("sample.png");
             updatedItem.setContentType("image/png");
             updatedItem.setFileSize(fileBytes.length);
             String base64FileUpdate = Base64.getEncoder().encodeToString(fileBytes);
-
             Map<String, Object> payloadUpdate = new HashMap<>();
             payloadUpdate.put("orderId", updatedItem.getOrderId());
             payloadUpdate.put("productId", updatedItem.getProductId());
@@ -129,14 +146,13 @@ public class ClientMain
             payloadUpdate.put("fileName", "sample.png");
             payloadUpdate.put("contentType", "image/png");
             payloadUpdate.put("fileSize", fileBytes.length);
-
             String updatedItemJson = mapper.writeValueAsString(payloadUpdate);
             sendRequest(new ClientRequest("update", "orderitem", 1, updatedItemJson));
 
             //metadata test
             sendRequest(new ClientRequest("getMetadata", "orderitem", 1, null));
 
-            //download
+            //download test
             sendRequest(new ClientRequest("download", "orderitem", 1, null));
 
             //delete order item
