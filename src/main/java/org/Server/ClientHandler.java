@@ -492,15 +492,42 @@ public class ClientHandler implements Runnable
             //-----------------------------------------------------------------------
             if ("orders".equalsIgnoreCase(entity))
             {
+                if ("download".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Order ID required"));
+                    }
+
+                    Optional<Orders> orderOpt = ordersService.getOrderById(request.getId());
+
+                    if (orderOpt.isEmpty() || orderOpt.get().getFileData() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("File not found"));
+                    }
+
+                    Orders order = orderOpt.get();
+                    String base64 = Base64.getEncoder().encodeToString(order.getFileData());
+
+                    java.util.Map<String, Object> payload = new java.util.HashMap<>();
+                    payload.put("fileName", order.getFileName());
+                    payload.put("contentType", order.getContentType());
+                    payload.put("fileData", base64);
+
+                    return mapper.writeValueAsString(ServerResponse.success("File retrieved", payload));
+                }
+
                 //Get all orders
                 if ("getAll".equalsIgnoreCase(action))
                 {
                     List<Orders> orders = ordersService.getAllOrders();
 
-                    ServerResponse<List<Orders>> response =
-                            ServerResponse.success("Orders retrieved successfully", orders);
+                    for (Orders order : orders)
+                    {
+                        order.setFileData(null);
+                    }
 
-                    return mapper.writeValueAsString(response);
+                    return mapper.writeValueAsString(ServerResponse.success("Orders retrieved successfully", orders));
                 }
 
                 //Get order by ID
@@ -526,15 +553,27 @@ public class ClientHandler implements Runnable
                 //Insert order
                 if ("insert".equalsIgnoreCase(action))
                 {
-                    if (request.getJsonData() == null || request.getJsonData().isEmpty())
+                    java.util.Map<String, Object> map = mapper.readValue(request.getJsonData(), java.util.Map.class);
+
+                    byte[] fileBytes = null;
+
+                    if (map.get("fileData") != null)
                     {
-                        return mapper.writeValueAsString(ServerResponse.error("Order JSON data is required"));
+                        fileBytes = Base64.getDecoder().decode((String) map.get("fileData"));
                     }
 
-                    Orders order = mapper.readValue(request.getJsonData(), Orders.class);
-                    Orders savedOrder = ordersService.addOrder(order);
+                    Orders order = new Orders((int) map.get("customerId"),
+                                                            mapper.convertValue(map.get("orderDate"),
+                                                            java.time.LocalDateTime.class),
+                                                            Orders.OrderStatus.valueOf((String) map.get("status")));
 
-                    return mapper.writeValueAsString(ServerResponse.success("Order inserted successfully", savedOrder));
+                    order.setFileData(fileBytes);
+                    order.setFileName((String) map.get("fileName"));
+                    order.setContentType((String) map.get("contentType"));
+                    order.setFileSize((int) map.get("fileSize"));
+
+                    Orders saved = ordersService.addOrder(order);
+                    return mapper.writeValueAsString(ServerResponse.success("Order inserted", saved));
                 }
 
                 //Update order
@@ -545,10 +584,28 @@ public class ClientHandler implements Runnable
                         return mapper.writeValueAsString(ServerResponse.error("Order ID is required for update"));
                     }
 
-                    Orders order = mapper.readValue(request.getJsonData(), Orders.class);
-                    Orders updated = ordersService.updateOrder(request.getId(), order);
+                    java.util.Map<String, Object> map = mapper.readValue(request.getJsonData(), java.util.Map.class);
 
-                    return mapper.writeValueAsString(ServerResponse.success("Order updated successfully", updated));
+                    byte[] fileBytes = null;
+
+                    if (map.get("fileData") != null)
+                    {
+                        fileBytes = Base64.getDecoder().decode((String) map.get("fileData"));
+                    }
+
+                    Orders order = new Orders(request.getId(),
+                                                (int) map.get("customerId"),
+                                                mapper.convertValue(map.get("orderDate"),
+                                                java.time.LocalDateTime.class),
+                                                Orders.OrderStatus.valueOf((String) map.get("status")));
+
+                    order.setFileData(fileBytes);
+                    order.setFileName((String) map.get("fileName"));
+                    order.setContentType((String) map.get("contentType"));
+                    order.setFileSize((int) map.get("fileSize"));
+
+                    Orders updated = ordersService.updateOrder(request.getId(), order);
+                    return mapper.writeValueAsString(ServerResponse.success("Order updated", updated));
                 }
 
                 //Delete order
