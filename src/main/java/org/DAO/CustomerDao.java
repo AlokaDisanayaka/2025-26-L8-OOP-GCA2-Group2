@@ -20,4 +20,10 @@ public interface CustomerDao {
 
     //filter customers using a Predicate
     List<Customer> findCustomersByFilter(Predicate<Customer> filter);
+
+    Customer insertCustomerWithFile(Customer customer);
+
+    Optional<Customer> getCustomerFileById(int id);
+
+    Optional<Customer> getCustomerMetadataById(int id);
 }
