@@ -23,4 +23,10 @@ public interface ProductDao {
 
     //filter products using a Predicate
     List<Product> findProductsByFilter(Predicate<Product> filter);
+
+    Product insertProductWithFile(Product product);
+
+    Optional<Product> getProductFileById(int id);
+
+    Optional<Product> getProductMetadataById(int id);
 }
