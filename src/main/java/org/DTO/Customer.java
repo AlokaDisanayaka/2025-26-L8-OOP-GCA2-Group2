@@ -6,6 +6,12 @@ public class Customer {
     private String email;
     private String phone;
 
+    //NEW FILE FIELD FOR STAGE 3
+    private String fileName;
+    private String contentType;
+    private int fileSize;
+    private byte[] fileData;
+
     public Customer(int customerId, String name, String email, String phone)
     {
         this.customerId=customerId;
@@ -79,4 +85,53 @@ public class Customer {
     {
         this.phone = (phone == null) ? null : phone.trim();
     }
+    //stage 3 binary schema integration
+
+    public String getFileName()
+    {
+        return this.fileName;
+    }
+
+    public void setFileName(String fileName)
+    {
+        this.fileName = fileName;
+    }
+
+    public String getContentType()
+    {
+        return this.contentType;
+    }
+
+    public void setContentType(String contentType)
+    {
+        this.contentType = contentType;
+    }
+
+    public int getFileSize()
+    {
+        return this.fileSize;
+    }
+
+    public void setFileSize(int fileSize) {
+        if (fileSize < 0)
+        {
+            throw new IllegalArgumentException("File size cannot be negative");
+        }
+        this.fileSize = fileSize;
+    }
+
+    public byte[] getFileData()
+    {
+        return this.fileData;
+    }
+
+    public void setFileData(byte[] fileData)
+    {
+        this.fileData = fileData;
+    }
+
+
+
+
+
 }
