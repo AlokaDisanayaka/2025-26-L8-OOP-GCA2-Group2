@@ -154,6 +154,14 @@ public class ClientHandler implements Runnable
             String action = request.getAction();
             String entity = request.getEntity();
 
+            // Stage 3=>  disconnect request
+            if ("disconnect".equalsIgnoreCase(action))
+            {
+                System.out.println("Client sent DISCONNECT request.");
+                return mapper.writeValueAsString(ServerResponse.success("Client disconnected successfully", null)
+                );
+            }
+
 
             // CUSTOMER REQUESTS
             //-----------------------------------------------------------------------
@@ -272,6 +280,70 @@ public class ClientHandler implements Runnable
 
                     return mapper.writeValueAsString(response);
                 }
+
+                if ("uploadFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for file upload"));
+                    }
+
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer file JSON data is required"));
+                    }
+
+                    // Jackson automatically converts Base64 JSON into byte[]
+                    Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
+
+                    Customer savedCustomer = customerService.uploadCustomerFile(request.getId(), customer);
+
+                    return mapper.writeValueAsString(ServerResponse.success("Customer file uploaded successfully", savedCustomer));
+                }
+
+                if ("getFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for file retrieval"));
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerFileById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Customer file retrieved successfully", customer.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer file not found"));
+                    }
+                }
+
+                if ("getFileMetadata".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for metadata"));
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerFileMetadataById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        return mapper.writeValueAsString(
+                                ServerResponse.success("Customer file metadata retrieved", customer.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer metadata not found"));
+                    }
+                }
+
+
             }
 
             // PRODUCT REQUESTS
