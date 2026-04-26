@@ -343,6 +343,70 @@ public class ClientHandler implements Runnable
                     }
                 }
 
+                //upload customer file
+                if ("uploadFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for file upload"));
+                    }
+
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty()) {return mapper.writeValueAsString(
+                                ServerResponse.error("Customer file JSON data is required")
+                        );
+                    }
+
+                    // Convert JSON → Customer object
+                    Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
+
+                    Customer savedCustomer = customerService.uploadCustomerFile(request.getId(), customer);
+
+                    return mapper.writeValueAsString(ServerResponse.success("Customer file uploaded successfully", savedCustomer));
+                }
+
+                //get full customer file
+                if ("getFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for file retrieval"));
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerFileById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Customer file retrieved successfully", customer.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer file not found"));
+                    }
+                }
+
+                //get customer metadata
+                if ("getFileMetadata".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for metadata"));
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerFileMetadataById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Customer metadata retrieved", customer.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer metadata not found"));
+                    }
+                }
+
 
             }
 
@@ -464,6 +528,66 @@ public class ClientHandler implements Runnable
 
                     return mapper.writeValueAsString(response);
                 }
+
+                //upload product  file
+                if ("uploadFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(
+                                ServerResponse.error("Product ID is required for file upload")
+                        );
+                    }
+
+                    Product product = mapper.readValue(request.getJsonData(), Product.class);
+
+                    Product savedProduct = productService.uploadProductFile(request.getId(), product);
+
+                    return mapper.writeValueAsString(ServerResponse.success("Product file uploaded successfully", savedProduct));
+                }
+                //get full product file
+                if ("getFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Product ID is required"));
+                    }
+
+                    Optional<Product> product = productService.getProductFileById(request.getId());
+
+                    if (product.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Product file retrieved successfully", product.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Product file not found"));
+                    }
+                }
+
+                //get product metadata
+                if ("getFileMetadata".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Product ID is required"));
+                    }
+
+                    Optional<Product> product = productService.getProductFileMetadataById(request.getId());
+
+                    if (product.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Product metadata retrieved", product.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Product metadata not found"));
+                    }
+                }
+
             }
             // REVIEW REQUESTS
 
