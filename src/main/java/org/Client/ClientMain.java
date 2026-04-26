@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import java.nio.file.Paths;
+
 //testing client
 public class ClientMain
 {
@@ -44,6 +46,13 @@ public class ClientMain
             //testing delete customer by id
             sendRequest(new ClientRequest("delete", "customer", 21, null));
 
+            //testing upload customer file
+            uploadCustomerFile(1, "test_files/customer.jpg");
+            //testing metadata
+            getCustomerFileMetadata(1);
+            //testing download file
+            getCustomerFile(1);
+
 
             //PRODUCT
             //-------------------------------------------------------------
@@ -62,7 +71,12 @@ public class ClientMain
             sendRequest(new ClientRequest("update", "product", 1, updatedProductJson));
             //testing delete product by id
             sendRequest(new ClientRequest("delete", "product", 21, null));
-
+            //testing upload product file
+            uploadProductFile(1, "test_files/product.jpg");
+            //testing metadata
+            getProductFileMetadata(1);
+            //testing download file
+            getProductFile(1);
 
             //ORDERS
             //-------------------------------------------------------------
@@ -73,7 +87,7 @@ public class ClientMain
             sendRequest(new ClientRequest("getById", "orders", 1, null));
 
             //insert new order
-            byte[] orderFile = readFile("C:/test/sample.png");
+            byte[] orderFile = readFile("test_files/sample.png");
             String orderBase64 = Base64.getEncoder().encodeToString(orderFile);
             Map<String, Object> orderPayload = new HashMap<>();
             orderPayload.put("customerId", 1);
@@ -87,7 +101,7 @@ public class ClientMain
             sendRequest(new ClientRequest("insert", "orders", null, orderJson));
 
             //update order
-            byte[] updatedOrderFile = readFile("C:/test/sample.png");
+            byte[] updatedOrderFile = readFile("test_files/sample.png");
             String updatedOrderBase64 = Base64.getEncoder().encodeToString(updatedOrderFile);
             Map<String, Object> orderUpdatePayload = new HashMap<>();
             orderUpdatePayload.put("customerId", 1);
@@ -118,7 +132,7 @@ public class ClientMain
             sendRequest(new ClientRequest("getById", "orderitem", 1, null));
 
             //insert order item
-            byte[] fileBytes = readFile("C:/test/sample.png");
+            byte[] fileBytes = readFile("test_files/sample.png");
             OrderItem newItem = new OrderItem(1, 1, 2, 99.99);
             String base64File = Base64.getEncoder().encodeToString(fileBytes);
             Map<String, Object> payload = new HashMap<>();
@@ -198,8 +212,7 @@ public class ClientMain
             sendRequest(new ClientRequest("filterByRating", "review", 5, null));
 
 
-            //DISCONNECT client
-            sendRequest(new ClientRequest("disconnect", "client", null, null));
+          disconnect();
         }
         catch (Exception e)
         {
@@ -281,4 +294,143 @@ public class ClientMain
     {
         return Files.readAllBytes(Path.of(filePath));
     }
+
+    //customer file upload
+    public static void uploadCustomerFile(int customerId, String filePath)
+    {
+        try
+        {
+            ObjectMapper mapper = ObjectMapperProvider.getMapper();
+
+            //  Read file from disk into byte[]
+            Path path = Paths.get(filePath);
+            byte[] fileBytes = Files.readAllBytes(path);
+
+            //  Create a Customer object ONLY for file data
+            Customer customer = new Customer();
+
+            // Temporary required fields so DTO validation passes during file upload
+            customer.setName("Temp Customer");
+            customer.setEmail("temp@email.com");
+            customer.setPhone("0000000000");
+
+            // Store metadata
+            customer.setFileName(path.getFileName().toString());
+            customer.setContentType("image/png"); // you can change if needed
+            customer.setFileSize(fileBytes.length);
+
+            // Store actual binary file
+            customer.setFileData(fileBytes);
+
+            // Convert Customer object to JSON
+            String jsonData = mapper.writeValueAsString(customer);
+
+            // Send request to server
+            sendRequest(new ClientRequest(
+                    "uploadFile",
+                    "customer",
+                    customerId,
+                    jsonData
+            ));
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error uploading customer file: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    //product file upload
+    public static void uploadProductFile(int productId, String filePath)
+    {
+        try
+        {
+            ObjectMapper mapper = ObjectMapperProvider.getMapper();
+
+            Path path = Paths.get(filePath);
+            byte[] fileBytes = Files.readAllBytes(path);
+
+            Product product = new Product();
+
+            // Temporary required fields so DTO validation passes during file upload
+            product.setProductName("Temp Product");
+            product.setUnitPrice(1.0);
+            product.setStockQty(1);
+            product.setActive(true);
+
+            product.setFileName(path.getFileName().toString());
+            product.setContentType("image/png");
+            product.setFileSize(fileBytes.length);
+            product.setFileData(fileBytes);
+
+            String jsonData = mapper.writeValueAsString(product);
+
+            sendRequest(new ClientRequest(
+                    "uploadFile",
+                    "product",
+                    productId,
+                    jsonData
+            ));
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error uploading product file: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    //get customer file
+    public static void getCustomerFile(int customerId)
+    {
+        // This will trigger file download automatically inside sendRequest()
+        sendRequest(new ClientRequest(
+                "getFile",
+                "customer",
+                customerId,
+                null
+        ));
+    }
+    //get product file
+    public static void getProductFile(int productId)
+    {
+        sendRequest(new ClientRequest(
+                "getFile",
+                "product",
+                productId,
+                null
+        ));
+    }
+    //get metadata only
+    public static void getCustomerFileMetadata(int customerId)
+    {
+        sendRequest(new ClientRequest(
+                "getFileMetadata",
+                "customer",
+                customerId,
+                null
+        ));
+    }
+
+    public static void getProductFileMetadata(int productId)
+    {
+        sendRequest(new ClientRequest(
+                "getFileMetadata",
+                "product",
+                productId,
+                null
+        ));
+    }//disconnect
+    public static void disconnect()
+    {
+        sendRequest(new ClientRequest(
+                "disconnect",
+                "server",
+                null,
+                null
+        ));
+    }
+
+
+
+
+
+
 }
