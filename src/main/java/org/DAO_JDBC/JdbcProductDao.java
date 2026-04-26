@@ -188,4 +188,129 @@ public class JdbcProductDao implements ProductDao {
 
         return matchingProducts;
     }
+    @Override
+    public Product uploadProductFile(int id, Product product)
+    {
+
+        // Store file metadata and binary data for one product
+        String sql = "UPDATE Product SET file_name = ?, content_type = ?, file_size = ?, file_data = ? WHERE product_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
+
+            ps.setString(1, product.getFileName());
+            ps.setString(2, product.getContentType());
+            ps.setInt(3, product.getFileSize());
+
+            // Store actual binary file
+            ps.setBytes(4, product.getFileData());
+
+            ps.setInt(5, id);
+
+            int rows = ps.executeUpdate();
+
+            if (rows == 0)
+            {
+                throw new RuntimeException("No product found with id " + id);
+            }
+
+            product.setProductId(id);
+            return product;
+
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while uploading product file", e);
+        }
+    }
+
+    @Override
+    public Optional<Product> getProductFileById(int id)
+    {
+
+        // this query fetches the BLOB because we are downloading the file
+        String sql = "SELECT product_id, product_name, unit_price, stock_qty, is_active, file_name, content_type, file_size, file_data FROM Product WHERE product_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery())
+            {
+
+                if (rs.next())
+                {
+
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("product_name"),
+                            rs.getDouble("unit_price"),
+                            rs.getInt("stock_qty"),
+                            rs.getBoolean("is_active")
+                    );
+
+                    product.setFileName(rs.getString("file_name"));
+                    product.setContentType(rs.getString("content_type"));
+                    product.setFileSize(rs.getInt("file_size"));
+                    product.setFileData(rs.getBytes("file_data"));
+
+                    return Optional.of(product);
+                }
+            }
+
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while getting product file", e);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Product> getProductFileMetadataById(int id)
+    {
+
+        // file_data is NOT selected here
+        String sql = "SELECT product_id, product_name, unit_price, stock_qty, is_active, file_name, content_type, file_size FROM Product WHERE product_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery())
+            {
+
+                if (rs.next())
+                {
+
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("product_name"),
+                            rs.getDouble("unit_price"),
+                            rs.getInt("stock_qty"),
+                            rs.getBoolean("is_active")
+                    );
+
+                    product.setFileName(rs.getString("file_name"));
+                    product.setContentType(rs.getString("content_type"));
+                    product.setFileSize(rs.getInt("file_size"));
+
+                    return Optional.of(product);
+                }
+            }
+
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while getting product metadata", e);
+        }
+
+        return Optional.empty();
+    }
 }
