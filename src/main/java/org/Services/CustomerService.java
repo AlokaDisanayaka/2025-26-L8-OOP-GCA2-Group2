@@ -47,4 +47,18 @@ public class CustomerService {
     {
         return customerDao.findCustomersByFilter(filter);
     }
+    public Customer uploadCustomerFile(int id, Customer customer)
+    {
+        return customerDao.uploadCustomerFile(id, customer);
+    }
+
+    public Optional<Customer> getCustomerFileById(int id)
+    {
+        return customerDao.getCustomerFileById(id);
+    }
+
+    public Optional<Customer> getCustomerFileMetadataById(int id)
+    {
+        return customerDao.getCustomerFileMetadataById(id);
+    }
 }

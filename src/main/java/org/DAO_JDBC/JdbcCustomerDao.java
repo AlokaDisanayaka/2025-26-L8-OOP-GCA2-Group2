@@ -183,4 +183,135 @@ public class JdbcCustomerDao implements CustomerDao {
 
         return matchingCustomers;
     }
+
+
+    @Override
+    public Customer uploadCustomerFile(int id, Customer customer)
+    {
+
+        // Store file metadata and binary data for one customer
+        String sql = "UPDATE customer SET file_name = ?, content_type = ?, file_size = ?, file_data = ? WHERE customer_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
+
+            ps.setString(1, customer.getFileName());
+            ps.setString(2, customer.getContentType());
+            ps.setInt(3, customer.getFileSize());
+
+            // Store the actual binary file in the BLOB column
+            ps.setBytes(4, customer.getFileData());
+
+            ps.setInt(5, id);
+
+            int rows = ps.executeUpdate();
+
+            if (rows == 0)
+            {
+                throw new RuntimeException("No customer found with id " + id);
+            }
+
+            customer.setCustomerId(id);
+            return customer;
+
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while uploading customer file", e);
+        }
+    }
+
+    @Override
+    public Optional<Customer> getCustomerFileById(int id)
+    {
+
+        // This query includes file_data because we are downloading the file
+        String sql = "SELECT customer_id, name, email, phone, file_name, content_type, file_size, file_data FROM customer WHERE customer_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery())
+            {
+
+                if (rs.next())
+                {
+
+                    Customer customer = new Customer(
+                            rs.getInt("customer_id"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("phone")
+                    );
+
+                    customer.setFileName(rs.getString("file_name"));
+                    customer.setContentType(rs.getString("content_type"));
+                    customer.setFileSize(rs.getInt("file_size"));
+
+                    // read the BLOB from the database
+                    customer.setFileData(rs.getBytes("file_data"));
+
+                    return Optional.of(customer);
+                }
+            }
+
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while getting customer file", e);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Customer> getCustomerFileMetadataById(int id)
+    {
+
+        // this query does NOT fetch file_data
+        String sql = "SELECT customer_id, name, email, phone, file_name, content_type, file_size FROM customer WHERE customer_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql))
+        {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery())
+            {
+
+                if (rs.next())
+                {
+
+                    Customer customer = new Customer(
+                            rs.getInt("customer_id"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("phone")
+                    );
+
+                    customer.setFileName(rs.getString("file_name"));
+                    customer.setContentType(rs.getString("content_type"));
+                    customer.setFileSize(rs.getInt("file_size"));
+
+                    // fileData isNOT SET here
+                    return Optional.of(customer);
+                }
+            }
+
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Database error while getting customer metadata", e);
+        }
+
+        return Optional.empty();
+    }
+
+
+
 }

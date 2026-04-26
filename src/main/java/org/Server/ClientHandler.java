@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,6 +106,14 @@ public class ClientHandler implements Runnable
 
             out.println(responseJson);
 
+            //DISCONNECT request
+            if ("disconnect".equalsIgnoreCase(request.getAction()))
+            {
+                System.out.println("Client requested disconnect. Closing connection cleanly.");
+                clientSocket.close();
+                return;
+            }
+
         }
         catch (Exception e)
         {
@@ -144,6 +153,14 @@ public class ClientHandler implements Runnable
         {
             String action = request.getAction();
             String entity = request.getEntity();
+
+            // Stage 3=>  disconnect request
+            if ("disconnect".equalsIgnoreCase(action))
+            {
+                System.out.println("Client sent DISCONNECT request.");
+                return mapper.writeValueAsString(ServerResponse.success("Client disconnected successfully", null)
+                );
+            }
 
 
             // CUSTOMER REQUESTS
@@ -263,6 +280,134 @@ public class ClientHandler implements Runnable
 
                     return mapper.writeValueAsString(response);
                 }
+
+                if ("uploadFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for file upload"));
+                    }
+
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer file JSON data is required"));
+                    }
+
+                    // Jackson automatically converts Base64 JSON into byte[]
+                    Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
+
+                    Customer savedCustomer = customerService.uploadCustomerFile(request.getId(), customer);
+
+                    return mapper.writeValueAsString(ServerResponse.success("Customer file uploaded successfully", savedCustomer));
+                }
+
+                if ("getFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for file retrieval"));
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerFileById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Customer file retrieved successfully", customer.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer file not found"));
+                    }
+                }
+
+                if ("getFileMetadata".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for metadata"));
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerFileMetadataById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        return mapper.writeValueAsString(
+                                ServerResponse.success("Customer file metadata retrieved", customer.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer metadata not found"));
+                    }
+                }
+
+                //upload customer file
+                if ("uploadFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for file upload"));
+                    }
+
+                    if (request.getJsonData() == null || request.getJsonData().trim().isEmpty()) {return mapper.writeValueAsString(
+                                ServerResponse.error("Customer file JSON data is required")
+                        );
+                    }
+
+                    // Convert JSON → Customer object
+                    Customer customer = mapper.readValue(request.getJsonData(), Customer.class);
+
+                    Customer savedCustomer = customerService.uploadCustomerFile(request.getId(), customer);
+
+                    return mapper.writeValueAsString(ServerResponse.success("Customer file uploaded successfully", savedCustomer));
+                }
+
+                //get full customer file
+                if ("getFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for file retrieval"));
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerFileById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Customer file retrieved successfully", customer.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer file not found"));
+                    }
+                }
+
+                //get customer metadata
+                if ("getFileMetadata".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer ID is required for metadata"));
+                    }
+
+                    Optional<Customer> customer = customerService.getCustomerFileMetadataById(request.getId());
+
+                    if (customer.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Customer metadata retrieved", customer.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Customer metadata not found"));
+                    }
+                }
+
+
             }
 
             // PRODUCT REQUESTS
@@ -383,6 +528,66 @@ public class ClientHandler implements Runnable
 
                     return mapper.writeValueAsString(response);
                 }
+
+                //upload product  file
+                if ("uploadFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(
+                                ServerResponse.error("Product ID is required for file upload")
+                        );
+                    }
+
+                    Product product = mapper.readValue(request.getJsonData(), Product.class);
+
+                    Product savedProduct = productService.uploadProductFile(request.getId(), product);
+
+                    return mapper.writeValueAsString(ServerResponse.success("Product file uploaded successfully", savedProduct));
+                }
+                //get full product file
+                if ("getFile".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Product ID is required"));
+                    }
+
+                    Optional<Product> product = productService.getProductFileById(request.getId());
+
+                    if (product.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Product file retrieved successfully", product.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Product file not found"));
+                    }
+                }
+
+                //get product metadata
+                if ("getFileMetadata".equalsIgnoreCase(action))
+                {
+
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Product ID is required"));
+                    }
+
+                    Optional<Product> product = productService.getProductFileMetadataById(request.getId());
+
+                    if (product.isPresent())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.success("Product metadata retrieved", product.get()));
+                    }
+                    else
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Product metadata not found"));
+                    }
+                }
+
             }
             // REVIEW REQUESTS
 
@@ -483,15 +688,68 @@ public class ClientHandler implements Runnable
             //-----------------------------------------------------------------------
             if ("orders".equalsIgnoreCase(entity))
             {
+                //metadata only request (returns only file metadata for an orders without downloading the BLOB)
+                if ("getMetadata".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Order ID required"));
+                    }
+
+                    Optional<Orders> orderOpt = ordersService.getOrdersMetadataById(request.getId());
+
+                    if (orderOpt.isEmpty())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Order not found"));
+                    }
+
+                    Orders order = orderOpt.get();
+
+                    //only return metadata fields
+                    java.util.Map<String, Object> meta = new java.util.HashMap<>();
+                    meta.put("fileName", order.getFileName());
+                    meta.put("contentType", order.getContentType());
+                    meta.put("fileSize", order.getFileSize());
+
+                    return mapper.writeValueAsString(ServerResponse.success("Metadata retrieved", meta));
+                }
+
+                if ("download".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("Order ID required"));
+                    }
+
+                    Optional<Orders> orderOpt = ordersService.getOrderById(request.getId());
+
+                    if (orderOpt.isEmpty() || orderOpt.get().getFileData() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("File not found"));
+                    }
+
+                    Orders order = orderOpt.get();
+                    String base64 = Base64.getEncoder().encodeToString(order.getFileData());
+
+                    java.util.Map<String, Object> payload = new java.util.HashMap<>();
+                    payload.put("fileName", order.getFileName());
+                    payload.put("contentType", order.getContentType());
+                    payload.put("fileData", base64);
+
+                    return mapper.writeValueAsString(ServerResponse.success("File retrieved", payload));
+                }
+
                 //Get all orders
                 if ("getAll".equalsIgnoreCase(action))
                 {
                     List<Orders> orders = ordersService.getAllOrders();
 
-                    ServerResponse<List<Orders>> response =
-                            ServerResponse.success("Orders retrieved successfully", orders);
+                    for (Orders order : orders)
+                    {
+                        order.setFileData(null);
+                    }
 
-                    return mapper.writeValueAsString(response);
+                    return mapper.writeValueAsString(ServerResponse.success("Orders retrieved successfully", orders));
                 }
 
                 //Get order by ID
@@ -517,15 +775,27 @@ public class ClientHandler implements Runnable
                 //Insert order
                 if ("insert".equalsIgnoreCase(action))
                 {
-                    if (request.getJsonData() == null || request.getJsonData().isEmpty())
+                    java.util.Map<String, Object> map = mapper.readValue(request.getJsonData(), java.util.Map.class);
+
+                    byte[] fileBytes = null;
+
+                    if (map.get("fileData") != null)
                     {
-                        return mapper.writeValueAsString(ServerResponse.error("Order JSON data is required"));
+                        fileBytes = Base64.getDecoder().decode((String) map.get("fileData"));
                     }
 
-                    Orders order = mapper.readValue(request.getJsonData(), Orders.class);
-                    Orders savedOrder = ordersService.addOrder(order);
+                    Orders order = new Orders((int) map.get("customerId"),
+                                                            mapper.convertValue(map.get("orderDate"),
+                                                            java.time.LocalDateTime.class),
+                                                            Orders.OrderStatus.valueOf((String) map.get("status")));
 
-                    return mapper.writeValueAsString(ServerResponse.success("Order inserted successfully", savedOrder));
+                    order.setFileData(fileBytes);
+                    order.setFileName((String) map.get("fileName"));
+                    order.setContentType((String) map.get("contentType"));
+                    order.setFileSize((int) map.get("fileSize"));
+
+                    Orders saved = ordersService.addOrder(order);
+                    return mapper.writeValueAsString(ServerResponse.success("Order inserted", saved));
                 }
 
                 //Update order
@@ -536,10 +806,28 @@ public class ClientHandler implements Runnable
                         return mapper.writeValueAsString(ServerResponse.error("Order ID is required for update"));
                     }
 
-                    Orders order = mapper.readValue(request.getJsonData(), Orders.class);
-                    Orders updated = ordersService.updateOrder(request.getId(), order);
+                    java.util.Map<String, Object> map = mapper.readValue(request.getJsonData(), java.util.Map.class);
 
-                    return mapper.writeValueAsString(ServerResponse.success("Order updated successfully", updated));
+                    byte[] fileBytes = null;
+
+                    if (map.get("fileData") != null)
+                    {
+                        fileBytes = Base64.getDecoder().decode((String) map.get("fileData"));
+                    }
+
+                    Orders order = new Orders(request.getId(),
+                                                (int) map.get("customerId"),
+                                                mapper.convertValue(map.get("orderDate"),
+                                                java.time.LocalDateTime.class),
+                                                Orders.OrderStatus.valueOf((String) map.get("status")));
+
+                    order.setFileData(fileBytes);
+                    order.setFileName((String) map.get("fileName"));
+                    order.setContentType((String) map.get("contentType"));
+                    order.setFileSize((int) map.get("fileSize"));
+
+                    Orders updated = ordersService.updateOrder(request.getId(), order);
+                    return mapper.writeValueAsString(ServerResponse.success("Order updated", updated));
                 }
 
                 //Delete order
@@ -567,10 +855,66 @@ public class ClientHandler implements Runnable
             //-----------------------------------------------------------------------
             if ("orderitem".equalsIgnoreCase(entity))
             {
+                //metadata only request (returns only file metadata for an order item without downloading the BLOB)
+                if ("getMetadata".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem ID required"));
+                    }
+
+                    Optional<OrderItem> itemOpt = orderItemService.getOrderItemMetadataById(request.getId());
+
+                    if (itemOpt.isEmpty())
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem not found"));
+                    }
+
+                    OrderItem item = itemOpt.get();
+
+                    //only return metadata fields
+                    java.util.Map<String, Object> meta = new java.util.HashMap<>();
+                    meta.put("fileName", item.getFileName());
+                    meta.put("contentType", item.getContentType());
+                    meta.put("fileSize", item.getFileSize());
+
+                    return mapper.writeValueAsString(ServerResponse.success("Metadata retrieved", meta));
+                }
+
+                if ("download".equalsIgnoreCase(action))
+                {
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem ID required"));
+                    }
+
+                    Optional<OrderItem> itemOpt = orderItemService.getOrderItemById(request.getId());
+
+                    if (itemOpt.isEmpty() || itemOpt.get().getFileData() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("File not found"));
+                    }
+
+                    OrderItem item = itemOpt.get();
+                    String base64 = Base64.getEncoder().encodeToString(item.getFileData());
+
+                    java.util.Map<String, Object> payload = new java.util.HashMap<>();
+                    payload.put("fileName", item.getFileName());
+                    payload.put("contentType", item.getContentType());
+                    payload.put("fileData", base64);
+
+                    return mapper.writeValueAsString(ServerResponse.success("File retrieved", payload));
+                }
+
                 //Get all items
                 if ("getAll".equalsIgnoreCase(action))
                 {
                     List<OrderItem> items = orderItemService.getAllOrderItems();
+
+                    for (OrderItem item : items)
+                    {
+                        item.setFileData(null);
+                    }
 
                     return mapper.writeValueAsString(ServerResponse.success("Order items retrieved", items));
                 }
@@ -598,18 +942,58 @@ public class ClientHandler implements Runnable
                 //Insert
                 if ("insert".equalsIgnoreCase(action))
                 {
-                    OrderItem item = mapper.readValue(request.getJsonData(), OrderItem.class);
-                    OrderItem saved = orderItemService.addOrderItem(item);
+                    java.util.Map<String, Object> map = mapper.readValue(request.getJsonData(), java.util.Map.class);
 
+                    byte[] fileBytes = null;
+
+                    if (map.get("fileData") != null)
+                    {
+                        fileBytes = Base64.getDecoder().decode((String) map.get("fileData"));
+                    }
+
+                    OrderItem item = new OrderItem(0, (int) map.get("orderId"),
+                                                        (int) map.get("productId"),
+                                                        (int) map.get("quantity"),
+                                                        ((Number) map.get("unitPriceAtTime")).doubleValue());
+
+                    item.setFileData(fileBytes);
+                    item.setFileName((String) map.get("fileName"));
+                    item.setContentType((String) map.get("contentType"));
+                    item.setFileSize((int) map.get("fileSize"));
+
+                    OrderItem saved = orderItemService.addOrderItem(item);
                     return mapper.writeValueAsString(ServerResponse.success("OrderItem inserted", saved));
                 }
 
                 //Update
                 if ("update".equalsIgnoreCase(action))
                 {
-                    OrderItem item = mapper.readValue(request.getJsonData(), OrderItem.class);
-                    OrderItem updated = orderItemService.updateOrderItem(request.getId(), item);
+                    if (request.getId() == null)
+                    {
+                        return mapper.writeValueAsString(ServerResponse.error("OrderItem ID is required for update"));
+                    }
 
+                    java.util.Map<String, Object> map = mapper.readValue(request.getJsonData(), java.util.Map.class);
+
+                    byte[] fileBytes = null;
+
+                    if (map.get("fileData") != null)
+                    {
+                        fileBytes = Base64.getDecoder().decode((String) map.get("fileData"));
+                    }
+
+                    OrderItem item = new OrderItem(request.getId(),
+                                                    (int) map.get("orderId"),
+                                                    (int) map.get("productId"),
+                                                    (int) map.get("quantity"),
+                                                    ((Number) map.get("unitPriceAtTime")).doubleValue());
+
+                    item.setFileData(fileBytes);
+                    item.setFileName((String) map.get("fileName"));
+                    item.setContentType((String) map.get("contentType"));
+                    item.setFileSize((int) map.get("fileSize"));
+
+                    OrderItem updated = orderItemService.updateOrderItem(request.getId(), item);
                     return mapper.writeValueAsString(ServerResponse.success("OrderItem updated", updated));
                 }
 

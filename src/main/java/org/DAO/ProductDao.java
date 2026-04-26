@@ -23,4 +23,13 @@ public interface ProductDao {
 
     //filter products using a Predicate
     List<Product> findProductsByFilter(Predicate<Product> filter);
+
+    // Stage 3- upload file for existing product
+    Product uploadProductFile(int id, Product product);
+
+    // Stage 3- retrieve product with full binary file
+    Optional<Product> getProductFileById(int id);
+
+    // Stage 3- retrieve only metadata, not the BLOB
+    Optional<Product> getProductFileMetadataById(int id);
 }

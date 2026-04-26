@@ -49,4 +49,19 @@ public class ProductService {
     {
         return productDao.findProductsByFilter(filter);
     }
+    public Product uploadProductFile(int id, Product product)
+    {
+        return productDao.uploadProductFile(id, product);
+    }
+
+    public Optional<Product> getProductFileById(int id)
+    {
+        return productDao.getProductFileById(id);
+    }
+
+    public Optional<Product> getProductFileMetadataById(int id)
+    {
+        return productDao.getProductFileMetadataById(id);
+    }
+
 }

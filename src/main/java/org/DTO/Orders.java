@@ -10,6 +10,11 @@ public class Orders
     private int customerId;
     private LocalDateTime orderDate;
     private OrderStatus status;
+    //Binary Schema Extension
+    private byte[] fileData;
+    private String fileName;
+    private String contentType;
+    private int fileSize;
 
     //Constructors
     public Orders(int orderId, int customerId, LocalDateTime orderDate, OrderStatus status)
@@ -25,6 +30,20 @@ public class Orders
         setOrderDate(orderDate);
         setStatus(status);
     }
+
+    public Orders(int orderId, int customerId, LocalDateTime orderDate, OrderStatus status,
+                  byte[] fileData, String fileName, String contentType, int fileSize)
+    {
+        setOrderId(orderId);
+        setCustomerId(customerId);
+        setOrderDate(orderDate);
+        setStatus(status);
+        setFileData(fileData);
+        setFileName(fileName);
+        setContentType(contentType);
+        setFileSize(fileSize);
+    }
+
     public Orders()
     {
     }
@@ -84,6 +103,47 @@ public class Orders
             throw new IllegalArgumentException("Status cannot be null");
         }
         this.status = status;
+    }
+
+    //Binary Schema Extension
+    public byte[] getFileData()
+    {
+        return fileData;
+    }
+
+    public void setFileData(byte[] fileData)
+    {
+        this.fileData = fileData; //allow null
+    }
+
+    public String getFileName()
+    {
+        return fileName;
+    }
+
+    public void setFileName(String fileName)
+    {
+        this.fileName = (fileName == null) ? "" : fileName.trim();
+    }
+
+    public String getContentType()
+    {
+        return contentType;
+    }
+
+    public void setContentType(String contentType)
+    {
+        this.contentType = (contentType == null) ? "" : contentType.trim();
+    }
+
+    public int getFileSize()
+    {
+        return fileSize;
+    }
+
+    public void setFileSize(int fileSize)
+    {
+        this.fileSize = Math.max(0, fileSize);
     }
 }
 

@@ -47,6 +47,11 @@ public class OrderItemService
         return orderItemDao.deleteOrderItemById(id);
     }
 
+    public Optional<OrderItem> getOrderItemMetadataById(int id)
+    {
+        return orderItemDao.getOrderItemMetadataById(id);
+    }
+
     //Filter with Predicate
     public List<OrderItem> findOrderItemsByFilter(Predicate<OrderItem> filter)
     {

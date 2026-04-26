@@ -8,6 +8,13 @@ public class Product {
     private int stockQty;
     private boolean isActive;
 
+    //NEW FILE FIELDS FOR STAGE 3
+    private String fileName;
+    private String contentType;
+    private int fileSize;
+    private byte[] fileData;
+
+
     // Constructor used when reading from DB
     public Product(int productId, String productName, double unitPrice,
                    int stockQty, boolean isActive)
@@ -97,5 +104,44 @@ public class Product {
     public void setActive(boolean active)
     {
         isActive = active;
+    }
+
+
+    //stage 3 binary schema integration
+
+    public String getFileName()
+    {
+        return this.fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getContentType() {
+        return this.contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public int getFileSize() {
+        return this.fileSize;
+    }
+
+    public void setFileSize(int fileSize) {
+        if (fileSize < 0) {
+            throw new IllegalArgumentException("File size cannot be negative");
+        }
+        this.fileSize = fileSize;
+    }
+
+    public byte[] getFileData() {
+        return this.fileData;
+    }
+
+    public void setFileData(byte[] fileData) {
+        this.fileData = fileData;
     }
 }

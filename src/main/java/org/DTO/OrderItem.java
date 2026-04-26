@@ -7,6 +7,11 @@ public class OrderItem
     private int productId;
     private int quantity;
     private double unitPriceAtTime;
+    //Binary Schema Extension
+    private byte[] fileData;         
+    private String fileName;
+    private String contentType;
+    private int fileSize;
 
     //Constructors
     public OrderItem(int orderItemId, int orderId, int productId, int quantity, double unitPriceAtTime)
@@ -24,6 +29,22 @@ public class OrderItem
         setQuantity(quantity);
         setUnitPriceAtTime(unitPriceAtTime);
     }
+
+    //Binary Schema Extension
+    public OrderItem(int orderItemId, int orderId, int productId, int quantity, double unitPriceAtTime,
+                     byte[] fileData, String fileName, String contentType, int fileSize)
+    {
+        setOrderItemId(orderItemId);
+        setOrderId(orderId);
+        setProductId(productId);
+        setQuantity(quantity);
+        setUnitPriceAtTime(unitPriceAtTime);
+        setFileData(fileData);
+        setFileName(fileName);
+        setContentType(contentType);
+        setFileSize(fileSize);
+    }
+
     public OrderItem()
     {
     }
@@ -38,7 +59,7 @@ public class OrderItem
     {
         if (orderItemId < 0)
         {
-            throw new IllegalArgumentException("OrderItemId must be greater than 0");
+            throw new IllegalArgumentException("OrderItemId cannot be negative");
         }
         this.orderItemId = orderItemId;
     }
@@ -97,6 +118,47 @@ public class OrderItem
             throw new IllegalArgumentException("UnitPriceAtTime must be 0 or greater");
         }
         this.unitPriceAtTime = unitPriceAtTime;
+    }
+
+    //Binary Schema Extension
+    public byte[] getFileData()
+    {
+        return fileData;
+    }
+
+    public void setFileData(byte[] fileData)
+    {
+        this.fileData = fileData; //allow null
+    }
+
+    public String getFileName()
+    {
+        return fileName;
+    }
+
+    public void setFileName(String fileName)
+    {
+        this.fileName = (fileName == null) ? "" : fileName.trim();
+    }
+
+    public String getContentType()
+    {
+        return contentType;
+    }
+
+    public void setContentType(String contentType)
+    {
+        this.contentType = (contentType == null) ? "" : contentType.trim();
+    }
+
+    public int getFileSize()
+    {
+        return fileSize;
+    }
+
+    public void setFileSize(int fileSize)
+    {
+        this.fileSize = Math.max(0, fileSize);
     }
 }
 

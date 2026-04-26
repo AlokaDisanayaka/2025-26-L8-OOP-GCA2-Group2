@@ -15,4 +15,6 @@ public interface OrdersDao
     Orders insertOrder(Orders order);
     Orders updateOrder(int id, Orders order);
 
+    Optional<Orders> getOrdersMetadataById(int id);
+
 }

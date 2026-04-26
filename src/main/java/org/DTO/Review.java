@@ -11,9 +11,14 @@ public class Review {
     private String comment;
     private Timestamp reviewDate;
 
-    // Constructor used when reading from DB
-    public Review(int reviewId, int customerId, int productId, int rating, String comment, Timestamp reviewDate)
-    {
+    // Stage 3 binary file fields
+    private byte[] fileData;
+    private String fileName;
+    private String contentType;
+    private int fileSize;
+
+    // Constructor used when reading from DB without file metadata
+    public Review(int reviewId, int customerId, int productId, int rating, String comment, Timestamp reviewDate) {
         this.reviewId = reviewId;
         this.customerId = customerId;
         this.productId = productId;
@@ -22,13 +27,25 @@ public class Review {
         this.reviewDate = reviewDate;
     }
 
-    public Review()
-    {
-
+    // Constructor used when reading from DB with file metadata
+    public Review(int reviewId, int customerId, int productId, int rating, String comment, Timestamp reviewDate,
+                  byte[] fileData, String fileName, String contentType, int fileSize) {
+        this.reviewId = reviewId;
+        this.customerId = customerId;
+        this.productId = productId;
+        this.rating = rating;
+        this.comment = comment;
+        this.reviewDate = reviewDate;
+        this.fileData = fileData;
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.fileSize = fileSize;
     }
 
-    public Review(int customerId, int productId, int rating, String comment, Timestamp reviewDate)
-    {
+    public Review() {
+    }
+
+    public Review(int customerId, int productId, int rating, String comment, Timestamp reviewDate) {
         this.reviewId = 0;
         this.customerId = customerId;
         this.productId = productId;
@@ -37,87 +54,104 @@ public class Review {
         this.reviewDate = reviewDate;
     }
 
-    public int getReviewId()
-    {
+    public int getReviewId() {
         return reviewId;
     }
 
-    public void setReviewId(int reviewId)
-    {
-        if (reviewId < 0)
-        {
+    public void setReviewId(int reviewId) {
+        if (reviewId < 0) {
             throw new IllegalArgumentException("Review ID cannot be negative");
         }
         this.reviewId = reviewId;
     }
 
-    public int getCustomerId()
-    {
+    public int getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(int customerId)
-    {
-        if (customerId < 0)
-        {
+    public void setCustomerId(int customerId) {
+        if (customerId < 0) {
             throw new IllegalArgumentException("Customer ID cannot be negative");
         }
         this.customerId = customerId;
     }
 
-    public int getProductId()
-    {
+    public int getProductId() {
         return productId;
     }
 
-    public void setProductId(int productId)
-    {
-        if (productId < 0)
-        {
+    public void setProductId(int productId) {
+        if (productId < 0) {
             throw new IllegalArgumentException("Product ID cannot be negative");
         }
         this.productId = productId;
     }
 
-    public int getRating()
-    {
+    public int getRating() {
         return rating;
     }
 
-    public void setRating(int rating)
-    {
-        if (rating < 1 || rating > 5)
-        {
+    public void setRating(int rating) {
+        if (rating < 1 || rating > 5) {
             throw new IllegalArgumentException("Rating must be between 1 and 5");
         }
         this.rating = rating;
     }
 
-    public String getComment()
-    {
+    public String getComment() {
         return comment;
     }
 
-    public void setComment(String comment)
-    {
-        if (comment == null || comment.trim().isEmpty())
-        {
+    public void setComment(String comment) {
+        if (comment == null || comment.trim().isEmpty()) {
             throw new IllegalArgumentException("Comment cannot be blank");
         }
         this.comment = comment.trim();
     }
 
-    public Timestamp getReviewDate()
-    {
+    public Timestamp getReviewDate() {
         return reviewDate;
     }
 
-    public void setReviewDate(Timestamp reviewDate)
-    {
-        if (reviewDate == null)
-        {
+    public void setReviewDate(Timestamp reviewDate) {
+        if (reviewDate == null) {
             throw new IllegalArgumentException("Review date cannot be null");
         }
         this.reviewDate = reviewDate;
+    }
+
+    public byte[] getFileData() {
+        return fileData;
+    }
+
+    public void setFileData(byte[] fileData) {
+        this.fileData = fileData;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public int getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(int fileSize) {
+        if (fileSize < 0) {
+            throw new IllegalArgumentException("File size cannot be negative");
+        }
+        this.fileSize = fileSize;
     }
 }
