@@ -305,3 +305,68 @@ Returns success/failure response
   "data": null
 }
 ```
+
+## 5. Binary File Handling (Stage 3+)
+
+### 5.1 What binary data represents in our domain
+In this system, binary data represents files attached to:
+  - Customer - (eg. profile pictures)
+  - Product - (eg. product images)
+  - Orders - (eg. receipts)
+  - OrderItems - (eg. item specific attachments)
+  - Review - (eg. supporting evidence)
+    
+These files are stored and transferred between client and server
+
+### 5.2 Storage approach
+DB table includes:
+  - `file_data` (BLOB)
+  - `file_name` (VARCHAR)
+  - `content_type` (VARCHAR)
+  - `file_size` (INT)
+    
+This schema is implemented across each table
+
+### 5.3 Supported binary operations
+| Operation | Request type | Notes |
+| :- | :- | :- |
+| Upload file | `insert` | Base64 encode bytes + include metadata |
+| Upload file | `update` | Replaces existing file using Base64 data |
+| Retrieve file | `download` | Base64 returned, client reconstructs file |
+| Query metadata only | `getMetadata` | Must not fetch the BLOB payload |
+
+---
+
+## 6. Testing & Coverage
+
+### 6.1 Running tests
+- Command:
+  - `mvn test`  
+- Location:
+  - `src/test/java/...`
+- Tests structure:  
+  Tests are organised by layer to match the project architecture
+  - `org.DAO_JDBC` - Tests database operations (CRUD methods)
+  - `org.JsonUtil` - Tests JSON serialisation and deserialisation (object <-> JSON round trip)
+  - `org.Services` - Tests business logic and filtering using predicates
+
+---
+
+## 7. Design Patterns, Generics, Lambdas
+
+### 7.1 Patterns used 
+- Pattern 1: `DAO` - Separates database logic from business logic. All SQL queries are inside DAO classes
+- Pattern 2: `Service Layer` - Contains business logic and keeps request handling code clean
+
+### 7.2 Generics usage
+- `ServerResponse<T>`
+  - Used to wrap all server responses in a consistent structure
+  - Allows different data types (Customer, Products, Orders, OrderItem, Review) without duplicating response classes
+- Additional Generic Usage:
+  - Java collections such as `List<OrderItem>` and `Optional<Orders>` use generics to ensure type safety when handling data
+
+### 7.3 Functional interfaces / lambdas
+- `Predicate<T>` filtering
+  - Used in service methods (eg. `findOrderItemsByFilter`)- Allows flexible filtering logic without creating multiple methods
+
+---
