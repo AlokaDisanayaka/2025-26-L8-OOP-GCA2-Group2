@@ -21,9 +21,14 @@ public interface CustomerDao {
     //filter customers using a Predicate
     List<Customer> findCustomersByFilter(Predicate<Customer> filter);
 
-    Customer insertCustomerWithFile(Customer customer);
+    // Stage 3- upload file for existing customer
+    Customer uploadCustomerFile(int id, Customer customer);
 
+    // Stage 3-retrieve customer with full binary file
     Optional<Customer> getCustomerFileById(int id);
 
-    Optional<Customer> getCustomerMetadataById(int id);
+    // Stage 3-retrieve only metadata, not the BLOB
+    Optional<Customer> getCustomerFileMetadataById(int id);
+
+
 }
