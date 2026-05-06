@@ -31,7 +31,8 @@ public class JdbcOrdersDaoTest
         dao = new JdbcOrdersDao();
     }
 
-    //Read
+    //READ
+    //tests that requesting a nonexistent order id returns an empty optional
     @Test
     void getOrderById_returnsEmpty_whenIdDoesNotExist()
     {
@@ -39,6 +40,7 @@ public class JdbcOrdersDaoTest
         assertTrue(result.isEmpty());
     }
 
+    //tests that getAllOrders returns a not null list even if empty
     @Test
     void getAllOrders_returnsList()
     {
@@ -46,6 +48,7 @@ public class JdbcOrdersDaoTest
         assertNotNull(orders);
     }
 
+    //tests that getOrdersByCustomerId returns a valid list for a given customer
     @Test
     void getOrdersByCustomerId_returnsMatchingOrders()
     {
@@ -53,7 +56,8 @@ public class JdbcOrdersDaoTest
         assertNotNull(orders);
     }
 
-    //Insert
+    //INSERT
+    //tests that inserting an order returns a generated ID and a valid object
     @Test
     void insertOrder_returnsGeneratedId()
     {
@@ -64,7 +68,8 @@ public class JdbcOrdersDaoTest
         assertTrue(inserted.getOrderId() > 0);
     }
 
-    //Update
+    //UPDATE
+    //tests that updating an order modifies its status correctly
     @Test
     void updateOrder_returnsUpdatedOrder()
     {
@@ -76,7 +81,8 @@ public class JdbcOrdersDaoTest
         assertEquals(Orders.OrderStatus.PAID, result.getStatus());
     }
 
-    //Delete
+    //DELETE
+    //tests that deleting an order returns true when the record exists and is removed
     @Test
     void deleteOrder_returnsTrue_whenExists()
     {
@@ -84,5 +90,59 @@ public class JdbcOrdersDaoTest
         boolean deleted = dao.deleteOrderById(order.getOrderId());
 
         assertTrue(deleted);
+    }
+
+    //FILTER
+    //tests that getOrdersByCustomerId only returns orders belonging to the given customer
+    @Test
+    void getOrdersByCustomerId_returnsOnlyMatchingOrders()
+    {
+        dao.insertOrder(new Orders(1, LocalDateTime.now(), Orders.OrderStatus.NEW));
+        dao.insertOrder(new Orders(1, LocalDateTime.now(), Orders.OrderStatus.PAID));
+        dao.insertOrder(new Orders(2, LocalDateTime.now(), Orders.OrderStatus.NEW));
+
+        List<Orders> result = dao.getOrdersByCustomerId(1);
+        assertFalse(result.isEmpty());
+        assertTrue(result.stream().allMatch(o -> o.getCustomerId() == 1));
+    }
+
+    //METADATA
+    //tests that metadata retrieval returns order details without loading file (blob) data
+    @Test
+    void getOrdersMetadataById_returnsMetadataWithoutFileData()
+    {
+        Orders order = new Orders(1, LocalDateTime.now(), Orders.OrderStatus.NEW);
+        order.setFileName("order.txt");
+        order.setContentType("text/plain");
+        order.setFileSize(200);
+
+        Orders inserted = dao.insertOrder(order);
+        Optional<Orders> result = dao.getOrdersMetadataById(inserted.getOrderId());
+        assertTrue(result.isPresent());
+
+        assertNull(result.get().getFileData());
+        assertEquals("order.txt", result.get().getFileName());
+        assertEquals("text/plain", result.get().getContentType());
+        assertEquals(200, result.get().getFileSize());
+    }
+
+    //BINARY DATA
+    //tests that file byte[] data is stored and retrieved correctly without corruption
+    @Test
+    void insertAndRetrieveOrder_withFile_preservesBytes()
+    {
+        byte[] fileData = "Order".getBytes();
+
+        Orders order = new Orders(1, LocalDateTime.now(), Orders.OrderStatus.NEW);
+        order.setFileData(fileData);
+        order.setFileName("text.txt");
+        order.setContentType("text/plain");
+        order.setFileSize(fileData.length);
+
+        Orders inserted = dao.insertOrder(order);
+        Optional<Orders> retrieved = dao.getOrderById(inserted.getOrderId());
+
+        assertTrue(retrieved.isPresent());
+        assertArrayEquals(fileData, retrieved.get().getFileData());
     }
 }
