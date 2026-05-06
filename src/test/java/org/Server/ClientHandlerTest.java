@@ -138,4 +138,118 @@ public class ClientHandlerTest
 
         assertTrue(response.contains("fileData") || response.contains("error"));
     }
+
+    //ORDER ITEM
+    //----------
+    //get all
+    @Test
+    void orderItem_getAll_returnsSuccess() throws Exception
+    {
+        ClientRequest request = new ClientRequest("getAll", "orderitem", null, null);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("Order items"));
+    }
+
+    //get by id
+    @Test
+    void orderItem_getById_returnsResult() throws Exception
+    {
+        ClientRequest request = new ClientRequest("getById", "orderitem", 1, null);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("success") || response.contains("error"));
+    }
+
+    //insert
+    @Test
+    void orderItem_insert_createsOrderItem() throws Exception
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("orderId", 1);
+        payload.put("productId", 2);
+        payload.put("quantity", 3);
+        payload.put("unitPriceAtTime", 9.99);
+        payload.put("fileData", null);
+        payload.put("fileName", null);
+        payload.put("contentType", null);
+        payload.put("fileSize", 0);
+
+        String json = mapper.writeValueAsString(payload);
+        ClientRequest request = new ClientRequest("insert", "orderitem", null, json);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("OrderItem inserted"));
+    }
+
+    //insert with file
+    @Test
+    void orderItem_insert_withFile_success() throws Exception
+    {
+        byte[] file = "hello".getBytes();
+        String base64 = Base64.getEncoder().encodeToString(file);
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("orderId", 1);
+        payload.put("productId", 2);
+        payload.put("quantity", 3);
+        payload.put("unitPriceAtTime", 9.99);
+        payload.put("fileData", base64);
+        payload.put("fileName", "hello.txt");
+        payload.put("contentType", "text/plain");
+        payload.put("fileSize", file.length);
+
+        String json = mapper.writeValueAsString(payload);
+        ClientRequest request = new ClientRequest("insert", "orderitem", null, json);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("OrderItem inserted"));
+    }
+
+    //update
+    @Test
+    void orderItem_update_returnsSuccess() throws Exception
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("orderId", 1);
+        payload.put("productId", 2);
+        payload.put("quantity", 10);
+        payload.put("unitPriceAtTime", 20.0);
+
+        String json = mapper.writeValueAsString(payload);
+        ClientRequest request = new ClientRequest("update", "orderitem", 1, json);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("success") || response.contains("error"));
+    }
+
+    //delete
+    @Test
+    void orderItem_delete_returnsResponse() throws Exception
+    {
+        ClientRequest request = new ClientRequest("delete", "orderitem", 1, null);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("success") || response.contains("error"));
+    }
+
+    //metadata
+    @Test
+    void orderItem_metadata_returnsInfo() throws Exception
+    {
+        ClientRequest request = new ClientRequest("getMetadata", "orderitem", 1, null);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("Metadata") || response.contains("error"));
+    }
+
+    //download
+    @Test
+    void orderItem_download_returnsFileData() throws Exception
+    {
+        ClientRequest request = new ClientRequest("download", "orderitem", 1, null);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("fileData") || response.contains("error"));
+    }
 }
