@@ -34,7 +34,7 @@ public class OrdersServiceTest
         service = new OrdersService(dao);
     }
 
-    //Read
+    //tests that the service can retrieve an order by ID when it exists
     @Test
     void getOrderById_returnsOrder_whenExists()
     {
@@ -45,6 +45,7 @@ public class OrdersServiceTest
         assertEquals(inserted.getOrderId(), result.get().getOrderId());
     }
 
+    //tests that retrieving all orders through the service returns a not null list
     @Test
     void getAllOrders_returnsList()
     {
@@ -52,6 +53,7 @@ public class OrdersServiceTest
         assertNotNull(result);
     }
 
+    //tests that retrieving orders by customer ID returns a valid list
     @Test
     void getOrdersByCustomerId_returnsMatchingOrders()
     {
@@ -59,7 +61,7 @@ public class OrdersServiceTest
         assertNotNull(result);
     }
 
-    //Insert
+    //tests that adding an order through the service returns an object with a generated ID
     @Test
     void addOrder_returnsOrderWithGeneratedId()
     {
@@ -70,7 +72,7 @@ public class OrdersServiceTest
         assertTrue(result.getOrderId() > 0);
     }
 
-    //Update
+    //tests that updating an order through the service correctly changes its status
     @Test
     void updateOrder_returnsUpdatedOrder()
     {
@@ -81,7 +83,7 @@ public class OrdersServiceTest
         assertEquals(Orders.OrderStatus.PAID, result.getStatus());
     }
 
-    //Delete
+    //tests that deleting an order through the service returns true when successful
     @Test
     void deleteOrder_returnsTrue_whenSuccessful()
     {
@@ -91,25 +93,51 @@ public class OrdersServiceTest
         assertTrue(result);
     }
 
-    //Metadata
+    //tests that metadata fields (file name, content type, file size) are correctly stored and retrieved
     @Test
-    void getOrdersMetadataById_returnsOptional()
+    void getOrdersMetadataById_returnsMetadataCorrectly()
     {
-        Orders inserted = dao.insertOrder(new Orders(1, LocalDateTime.now(), Orders.OrderStatus.NEW));
+        Orders order = new Orders(1, LocalDateTime.now(), Orders.OrderStatus.NEW);
+
+        order.setFileName("order.txt");
+        order.setContentType("text/plain");
+        order.setFileSize(100);
+
+        Orders inserted = dao.insertOrder(order);
         Optional<Orders> result = service.getOrdersMetadataById(inserted.getOrderId());
 
         assertTrue(result.isPresent());
+        assertEquals("order.txt", result.get().getFileName());
+        assertEquals("text/plain", result.get().getContentType());
+        assertEquals(100, result.get().getFileSize());
     }
 
-    //Business logic
+    //tests that the service filter method returns only orders matching the given condition
     @Test
     void findOrdersByFilter_returnsOnlyMatchingOrders()
     {
-        Orders o1 = dao.insertOrder(new Orders(1, LocalDateTime.now(), Orders.OrderStatus.NEW));
-        Orders o2 = dao.insertOrder(new Orders(1, LocalDateTime.now(), Orders.OrderStatus.PAID));
+        dao.insertOrder(new Orders(1, LocalDateTime.now(), Orders.OrderStatus.NEW));
+        dao.insertOrder(new Orders(1, LocalDateTime.now(), Orders.OrderStatus.PAID));
 
         List<Orders> result = service.findOrdersByFilter(o -> o.getStatus() == Orders.OrderStatus.PAID);
 
-        assertTrue(result.stream().anyMatch(o -> o.getStatus() == Orders.OrderStatus.PAID));
+        assertFalse(result.isEmpty());
+        assertTrue(result.stream().allMatch(o -> o.getStatus() == Orders.OrderStatus.PAID));
+    }
+
+    //tests that binary file data is correctly preserved when stored and retrieved through the service
+    @Test
+    void service_retrievesBinaryDataCorrectly()
+    {
+        byte[] data = "ORDERDATA".getBytes();
+
+        Orders order = new Orders(1, LocalDateTime.now(), Orders.OrderStatus.NEW);
+        order.setFileData(data);
+
+        Orders inserted = dao.insertOrder(order);
+        Optional<Orders> result = service.getOrderById(inserted.getOrderId());
+
+        assertTrue(result.isPresent());
+        assertArrayEquals(data, result.get().getFileData());
     }
 }
