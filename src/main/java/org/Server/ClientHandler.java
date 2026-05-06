@@ -148,7 +148,7 @@ public class ClientHandler implements Runnable
     }
 
     // the method handles one request and returns a JSON response string.
-    private String handleRequest(ClientRequest request) throws Exception {
+    public String handleRequest(ClientRequest request) throws Exception {
         try
         {
             String action = request.getAction();
