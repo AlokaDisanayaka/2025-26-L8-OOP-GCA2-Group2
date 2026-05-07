@@ -12,6 +12,7 @@ public class ClientRequest {
     private String entity;
     private Integer id;
     private String jsonData;
+    private String serviceType;
 
 
      // No-argument constructor needed for Jackson
@@ -26,6 +27,15 @@ public class ClientRequest {
         this.entity = entity;
         this.id = id;
         this.jsonData = jsonData;
+    }
+
+    //constructor including servicetype
+    public ClientRequest(String action, String entity, Integer id, String jsonData, String serviceType) {
+        this.action = action;
+        this.entity = entity;
+        this.id = id;
+        this.jsonData = jsonData;
+        this.serviceType = serviceType;
     }
 
     public String getAction()
@@ -66,5 +76,13 @@ public class ClientRequest {
     public void setJsonData(String jsonData)
     {
         this.jsonData = jsonData;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
     }
 }
