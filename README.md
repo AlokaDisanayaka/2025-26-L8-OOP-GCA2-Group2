@@ -556,7 +556,292 @@ Before demonstration, the following should be verified:
 - Client sends disconnect request
 - Server logs disconnect cleanly
 - JUnit tests pass using mvn test
+  
+## 11. Stage 4 Implementation Details
 
+### 11.1 Stage 4 Features Implemented
+- Added DAO, JSON, server request/response, binary upload/retrieval, and generic service tests
+- Achieved >=70% coverage using IntelliJ IDEA Coverage Runner
+- Added polymorphic generic service architecture using interfaces and Factory Pattern
+- Server dynamically routes service requests without conditional branching
+- Added JUnit tests for service abstraction and factory routing
+
+### 11.2 Stage 4 Generic Service Architecture
+
+Stage 4 introduced a generic service abstraction layer that allows the server to execute multiple service types polymorphically.
+
+The implementation follows an extensible architecture where new services can be added without modifying existing service execution logic.
+
+The client sends a request specifying a service type:
+```
+
+{
+  "action": "runService",
+  "serviceType": "FILE_UPLOAD"
+}
+```
+The server then:
+
+1. receives the request
+2. identifies the requested service type
+3. uses the GenericServiceFactory to create the correct service object
+4. executes the service polymorphically through the GenericService interface
+
+This design removes the need for large conditional service execution blocks and improves maintainability.
+
+### 11.3 Generic Service Structure
+
+The following package was added during Stage 4:
+```
+org
+ └── GenericServices
+       ├── GenericService.java
+       ├── FileUploadService.java
+       ├── ProductReportService.java
+       └── GenericServiceFactory.java
+```
+GenericService Interface
+
+The GenericService interface defines the common contract for all services:
+
+validation
+execution
+success message handling
+
+Implemented methods:
+```
+
+boolean validate(ClientRequest request);
+
+Object execute(ClientRequest request);
+
+String getSuccessMessage();
+```
+
+This allows all services to be executed polymorphically by the server.
+
+### 11.4 Concrete Service Implementations
+
+FileUploadService
+The FileUploadService handles binary product file uploads.
+
+Responsibilities:
+
+validates upload requests
+deserialises Product JSON
+uploads binary file data
+stores metadata and BLOB data using DAO methods
+
+This service demonstrates binary file handling through the generic service architecture.
+
+ProductReportService
+The ProductReportService generates simple product statistics.
+
+Responsibilities:
+
+retrieves all products
+counts active products
+counts low stock products
+returns a formatted report string
+
+This service demonstrates domain-specific business processing through the generic service architecture.
+
+### 11.5 Factory Pattern Implementation
+
+The project applies the Factory Pattern through the GenericServiceFactory class.
+
+The factory is responsible for creating the correct service implementation based on the requested service type.
+```
+Example:
+
+services.put("FILE_UPLOAD", FileUploadService::new);
+services.put("PRODUCT_REPORT", ProductReportService::new);
+```
+
+Benefits of the Factory Pattern in this project:
+
+- removes object creation logic from the server
+- improves extensibility
+- simplifies service routing
+- supports polymorphic execution
+- reduces coupling between classes
+
+Adding a new service only requires:
+
+1. creating a new service class
+2. implementing the GenericService interface
+3. registering the service in the factory
+
+No server execution logic needs to be modified.
+
+### 11.6 Polymorphic Service Routing
+
+The server routes service requests polymorphically inside ClientHandler.
+```
+The client sends:
+
+{
+  "action": "runService",
+  "serviceType": "PRODUCT_REPORT"
+}
+```
+
+The server then:
+```
+
+GenericService service =
+        GenericServiceFactory.getService(request.getServiceType());
+
+Object result = service.execute(request);
+```
+The server does not need to know the concrete service type.
+
+This demonstrates runtime polymorphism because different service implementations are executed through the same interface reference.
+
+### 11.7 Updated Architecture Summary
+
+The final Stage 4 architecture consists of:
+Client Layer
+Server Layer
+Generic Service Abstraction Layer
+DAO Layer
+Database Layer
+
+Updated architecture flow:
+
+Client
+   ↓
+Server / ClientHandler
+   ↓
+Generic Service Layer
+   ↓
+DAO Layer
+   ↓
+MySQL Database
+
+The Generic Service Layer acts as an abstraction between request handling and business processing.
+
+### 11.8 Extended Stage 4 Testing
+
+Stage 4 expanded the Stage 3 test suite to include:
+- all DAO CRUD methods
+- filtering methods
+- JSON round-trip tests
+- binary upload and retrieval tests
+- server request/response tests
+- generic service tests
+- factory routing tests
+
+Tests are organised into the following packages:
+```
+src/test/java/org/DAO_JDBC
+src/test/java/org/JsonUtil
+src/test/java/org/Services
+src/test/java/org/Server
+```
+###11.9 Binary Upload and Retrieval Testing
+Binary file handling tests verify that uploaded file bytes match retrieved file bytes.
+
+Example test flow:
+
+1. create test byte[]
+2. upload binary data
+3. retrieve binary data
+4. compare original and retrieved bytes using assertArrayEquals()
+
+This confirms that binary data is correctly preserved through:
+
+JSON serialisation
+server transfer
+database storage
+retrieval
+reconstruction
+
+### 11.10 Server Request / Response Testing
+ClientHandlerTest verifies server-side request handling.
+
+The tests simulate client requests and verify:
+
+successful JSON responses
+correct request routing
+proper error handling
+generic service execution
+binary upload handling
+
+Example tested actions:
+
+getAll
+getById
+add
+update
+delete
+runService
+uploadFile
+getFile
+getFileMetadata
+
+### 11.11 Coverage Threshold
+
+The IntelliJ IDEA built-in Coverage Runner was used to measure project coverage.
+
+Coverage includes:
+
+DAO layer
+JSON conversion classes
+Generic services
+Binary file handling logic
+Server request handling
+
+Coverage achieved:
+```
+>= 70%
+```
+Coverage evidence screenshot:
+```
+/reports/
+```
+### 11.12 Stage 4 Demonstration Checklist
+
+Before final demonstration, the following should be verified:
+
+- server starts successfully
+- client connects successfully
+- all CRUD operations work
+- binary file upload works
+- binary file retrieval works
+- metadata-only query works
+- disconnect request works
+- PRODUCT_REPORT service works
+- FILE_UPLOAD service works
+- JUnit tests pass
+- coverage screenshot included
+- architecture diagram updated
+
+### 12. Harvard References
+
+Fowler, M. (2003) Patterns of Enterprise Application Architecture. Boston: Addison-Wesley.
+
+Freeman, E. and Robson, E. (2021) Head First Design Patterns. 2nd edn. Sebastopol: O'Reilly Media.
+
+Oracle (2025) Java Documentation. Available at:
+https://docs.oracle.com/en/java/
+
+(Accessed: 8 May 2026).
+
+Oracle (2025) JDBC API Documentation. Available at:
+https://docs.oracle.com/javase/8/docs/technotes/guides/jdbc/
+
+(Accessed: 8 May 2026).
+
+FasterXML (2025) Jackson Databind Documentation. Available at:
+https://github.com/FasterXML/jackson-databind
+
+(Accessed: 8 May 2026).
+
+JUnit Team (2025) JUnit 5 User Guide. Available at:
+https://junit.org/junit5/docs/current/user-guide/
+
+(Accessed: 8 May 2026).
 
 
 ---
