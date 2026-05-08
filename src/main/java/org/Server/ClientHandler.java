@@ -35,6 +35,12 @@ import java.util.Optional;
 
 // Handles one connected client and runs on its own thread.
 
+/**
+ * @author Aloka (primary)
+ * @author Adhira Pillai (contributor)
+ * @author Victoria (contributor)
+ **/
+
 public class ClientHandler implements Runnable
 {
     private final Socket clientSocket;

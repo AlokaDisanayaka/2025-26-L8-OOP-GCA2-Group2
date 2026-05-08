@@ -175,6 +175,12 @@ org
  │     OrderItem.java
  │     Review.java
  │
+ |── GenericServices
+ │     FileUploadSerrvice.java
+ │     GenericService.java
+ │     GenericServiceFactory.java
+ │     ProductReportService.java
+ |
  ├── DAO
  │     CustomerDao.java
  │     ProductDao.java
@@ -306,67 +312,533 @@ Returns success/failure response
 }
 ```
 
-## 5. Binary File Handling (Stage 3+)
 
-### 5.1 What binary data represents in our domain
-In this system, binary data represents files attached to:
-  - Customer - (eg. profile pictures)
-  - Product - (eg. product images)
-  - Orders - (eg. receipts)
-  - OrderItems - (eg. item specific attachments)
-  - Review - (eg. supporting evidence)
-    
-These files are stored and transferred between client and server
+## 8. Design Patterns, Generics, Lambdas
 
-### 5.2 Storage approach
-DB table includes:
-  - `file_data` (BLOB)
-  - `file_name` (VARCHAR)
-  - `content_type` (VARCHAR)
-  - `file_size` (INT)
-    
-This schema is implemented across each table
-
-### 5.3 Supported binary operations
-| Operation | Request type | Notes |
-| :- | :- | :- |
-| Upload file | `insert` | Base64 encode bytes + include metadata |
-| Upload file | `update` | Replaces existing file using Base64 data |
-| Retrieve file | `download` | Base64 returned, client reconstructs file |
-| Query metadata only | `getMetadata` | Must not fetch the BLOB payload |
-
----
-
-## 6. Testing & Coverage
-
-### 6.1 Running tests
-- Command:
-  - `mvn test`  
-- Location:
-  - `src/test/java/...`
-- Tests structure:  
-  Tests are organised by layer to match the project architecture
-  - `org.DAO_JDBC` - Tests database operations (CRUD methods)
-  - `org.JsonUtil` - Tests JSON serialisation and deserialisation (object <-> JSON round trip)
-  - `org.Services` - Tests business logic and filtering using predicates
-
----
-
-## 7. Design Patterns, Generics, Lambdas
-
-### 7.1 Patterns used 
+### 8.1 Patterns used 
 - Pattern 1: `DAO` - Separates database logic from business logic. All SQL queries are inside DAO classes
 - Pattern 2: `Service Layer` - Contains business logic and keeps request handling code clean
 
-### 7.2 Generics usage
+### 8.2 Generics usage
 - `ServerResponse<T>`
   - Used to wrap all server responses in a consistent structure
   - Allows different data types (Customer, Products, Orders, OrderItem, Review) without duplicating response classes
 - Additional Generic Usage:
   - Java collections such as `List<OrderItem>` and `Optional<Orders>` use generics to ensure type safety when handling data
 
-### 7.3 Functional interfaces / lambdas
+### 8.3 Functional interfaces / lambdas
 - `Predicate<T>` filtering
   - Used in service methods (eg. `findOrderItemsByFilter`)- Allows flexible filtering logic without creating multiple methods
+
+---
+
+## 9. Stage 3 Implementation Details
+
+Stage 3 extends the existing client-server system by adding binary file upload, binary file retrieval, metadata-only queries, structured disconnect requests, and JUnit 5 testing.
+
+The implementation keeps all Stage 1 and Stage 2 functionality working while adding file support to the selected entity tables.
+
+---
+
+### 9.1 Stage 3 Features Implemented
+
+| Feature | Description | Status |
+| :- | :- | :- |
+| F17 Binary Schema Extension | Customer and Product tables were extended with BLOB and metadata fields | Implemented |
+| F18 Binary File Upload | Client reads a file from disk, sends it to server as Base64 JSON, and server stores it in database | Implemented |
+| F19 Binary File Retrieval | Client requests file by ID, server returns Base64 data, client reconstructs file on disk | Implemented |
+| F20 Metadata Query | Client can request filename, content type, and file size without downloading the BLOB | Implemented |
+| F21 Disconnect / Exit | Client sends a structured disconnect request before closing socket | Implemented |
+| F22 Unit Tests | JUnit 5 tests added for DAO, Service, and JSON behaviour | Implemented |
+
+---
+
+### 9.2 Binary Schema Extension
+
+The following binary fields were added to the selected entity tables:
+
+```sql
+file_name VARCHAR(255),
+content_type VARCHAR(100),
+file_size INT,
+file_data BLOB
+```
+
+### 9.3 DTO Binary Fields 
+The following fields were added to the relevant DTO classes:
+```
+private String fileName;
+private String contentType;
+private int fileSize;
+private byte[] fileData;
+```
+These fields allow the application to store:
+
+- the original file name
+- the content type
+- the file size in bytes
+- the actual binary file data
+
+Jackson automatically serialises the byte[] field as Base64 when converting the DTO to JSON.
+
+### 9.4 Binary Upload Flow 
+The upload flow works as follows:
+
+1. Client reads a file from disk using Files.readAllBytes(...)
+2. File data is stored in the DTO as a byte[]
+3. Jackson converts the DTO to JSON
+4. The byte[] is automatically represented as Base64 in JSON
+5. Client sends a structured ClientRequest
+6. Server receives the request
+7. Server converts the JSON back into a DTO
+8. DAO stores the binary data using PreparedStatement.setBytes(...)
+Example upload request:
+```
+{
+  "action": "uploadFile",
+  "entity": "product",
+  "id": 1,
+  "jsonData": "{...}"
+}
+```
+### 9.5 Binary Retrieval Flow 
+he retrieval flow works as follows:
+
+1. Client sends a getFile request with the record ID
+2. Server retrieves the record including the BLOB column
+3. Server returns the DTO in a ServerResponse<T>
+4. Jackson serialises the byte[] as Base64
+5. Client receives the response
+6. Client decodes the Base64 data
+7. Client writes the bytes back to disk using Files.write(...)
+
+Example retrieval request:
+```
+{
+  "action": "getFile",
+  "entity": "customer",
+  "id": 1,
+  "jsonData": null
+}
+```
+Expected result:
+
+```
+File saved as: customer.jpg
+```
+### 9.6 Metadata Only Query 
+
+The metadata query allows the client to request file information without downloading the full binary file.
+
+This is important because it avoids unnecessary transfer of large BLOB data.
+
+Example metadata request:
+
+```
+{
+  "action": "getFileMetadata",
+  "entity": "product",
+  "id": 1,
+  "jsonData": null
+}
+```
+Example metadata response:
+```
+{
+  "status": "success",
+  "message": "Product metadata retrieved",
+  "data": {
+    "productId": 1,
+    "productName": "Keyboard",
+    "unitPrice": 80.0,
+    "stockQty": 25,
+    "fileName": "product.jpg",
+    "contentType": "image/png",
+    "fileSize": 6725,
+    "fileData": null,
+    "active": true
+  }
+}
+```
+The metadata DAO query does not select the file_data column.
+
+### 9.7 Disconnect Request 
+
+Stage 3 requires the client to send a structured disconnect request before closing the socket.
+
+Example request:
+
+```
+{
+  "action": "disconnect",
+  "entity": "server",
+  "id": null,
+  "jsonData": null
+}
+```
+Expected response:
+
+```
+{
+  "status": "success",
+  "message": "Client disconnected successfully",
+  "data": null
+}
+```
+The server logs the disconnect and releases the client thread cleanly
+
+## 10 JUnit 5 Testing 
+JUnit 5 tests were added to verify core behaviour required by Stage 3.
+
+Tests are organised by layer:
+```
+src/test/java/org/DAO_JDBC
+src/test/java/org/JsonUtil
+src/test/java/org/Services
+```
+### 10.1 DAO tests
+
+DAO tests verify database behaviour such as:
+
+- reading records using getById
+- inserting records and checking generated IDs
+- returning empty Optional values when records do not exist
+
+Example DAO test names:
+```
+getCustomerById_returnsEmptyOptional_whenIdDoesNotExist
+insertCustomer_returnsGeneratedId_whenSuccessful
+getProductById_returnsProduct_whenIdExists
+insertProduct_returnsGeneratedId_whenSuccessful
+getOrderById_returnsEmpty_whenIdDoesNotExist()
+getOrdersByCustomerId_returnsMatchingOrders()
+void getOrderItemById_returnsEmptyOptional_whenIdDoesNotExist()
+updateOrderItem_returnsUpdatedItem_whenSuccessful()
+getReviewById_returnsEmpty_whenIdDoesNotExist()
+updateReview_returnsUpdatedReview()
+```
+### 10.2 JSON tests
+
+JSON tests verify object serialisation and deserialisation.
+
+They confirm that an object can be converted:
+
+object -> JSON -> object
+
+without losing field values.
+
+### 10.3 Service Tests 
+Service tests verify that the service layer correctly calls DAO functionality.
+
+Example service test names:
+```
+getCustomerById_returnsCustomer_whenExists
+addCustomer_returnsCustomerWithGeneratedId
+```
+All tests use @BeforeEach to create fresh DAO or Service objects before each test.
+
+### 10.4 Running the Test Suite
+The test suite verifies:
+
+- DAO read operations
+= inserts with generated IDs
+= JSON round-trip conversion
+= service layer behaviour
+
+The tests do not depend on execution order.
+
+### 10.5 Stage 3 Demonstration Checklist
+
+Before demonstration, the following should be verified:
+
+- Server starts successfully on port 5000
+- Client can connect to server
+- Customer file can be uploaded
+- Customer file metadata can be retrieved without downloading the BLOB
+- Customer file can be downloaded and reconstructed
+- Product file can be uploaded
+- Product file metadata can be retrieved without downloading the BLOB
+- Product file can be downloaded and reconstructed
+- Client sends disconnect request
+- Server logs disconnect cleanly
+- JUnit tests pass using mvn test
+  
+## 11. Stage 4 Implementation Details
+
+### 11.1 Stage 4 Features Implemented
+- Added DAO, JSON, server request/response, binary upload/retrieval, and generic service tests
+- Achieved >=70% coverage using IntelliJ IDEA Coverage Runner
+- Added polymorphic generic service architecture using interfaces and Factory Pattern
+- Server dynamically routes service requests without conditional branching
+- Added JUnit tests for service abstraction and factory routing
+
+### 11.2 Stage 4 Generic Service Architecture
+
+Stage 4 introduced a generic service abstraction layer that allows the server to execute multiple service types polymorphically.
+
+The implementation follows an extensible architecture where new services can be added without modifying existing service execution logic.
+
+The client sends a request specifying a service type:
+```
+
+{
+  "action": "runService",
+  "serviceType": "FILE_UPLOAD"
+}
+```
+The server then:
+
+1. receives the request
+2. identifies the requested service type
+3. uses the GenericServiceFactory to create the correct service object
+4. executes the service polymorphically through the GenericService interface
+
+This design removes the need for large conditional service execution blocks and improves maintainability.
+
+### 11.3 Generic Service Structure
+
+The following package was added during Stage 4:
+```
+org
+ └── GenericServices
+       ├── GenericService.java
+       ├── FileUploadService.java
+       ├── ProductReportService.java
+       └── GenericServiceFactory.java
+```
+GenericService Interface
+
+The GenericService interface defines the common contract for all services:
+
+validation
+execution
+success message handling
+
+Implemented methods:
+```
+
+boolean validate(ClientRequest request);
+
+Object execute(ClientRequest request);
+
+String getSuccessMessage();
+```
+
+This allows all services to be executed polymorphically by the server.
+
+### 11.4 Concrete Service Implementations
+
+FileUploadService
+The FileUploadService handles binary product file uploads.
+
+Responsibilities:
+
+- validates upload requests
+- deserialises Product JSON
+- uploads binary file data
+- stores metadata and BLOB data using DAO methods
+This service demonstrates binary file handling through the generic service architecture.
+
+ProductReportService
+The ProductReportService generates simple product statistics.
+
+Responsibilities:
+
+- retrieves all products
+- counts active products
+- counts low stock products
+- returns a formatted report string
+
+This service demonstrates domain-specific business processing through the generic service architecture.
+
+### 11.5 Factory Pattern Implementation
+
+The project applies the Factory Pattern through the GenericServiceFactory class.
+
+The factory is responsible for creating the correct service implementation based on the requested service type.
+```
+Example:
+
+services.put("FILE_UPLOAD", FileUploadService::new);
+services.put("PRODUCT_REPORT", ProductReportService::new);
+```
+
+Benefits of the Factory Pattern in this project:
+
+- removes object creation logic from the server
+- improves extensibility
+- simplifies service routing
+- supports polymorphic execution
+- reduces coupling between classes
+
+Adding a new service only requires:
+
+1. creating a new service class
+2. implementing the GenericService interface
+3. registering the service in the factory
+
+No server execution logic needs to be modified.
+
+### 11.6 Polymorphic Service Routing
+
+The server routes service requests polymorphically inside ClientHandler.
+```
+The client sends:
+
+{
+  "action": "runService",
+  "serviceType": "PRODUCT_REPORT"
+}
+```
+
+The server then:
+```
+
+GenericService service =
+        GenericServiceFactory.getService(request.getServiceType());
+
+Object result = service.execute(request);
+```
+The server does not need to know the concrete service type.
+
+This demonstrates runtime polymorphism because different service implementations are executed through the same interface reference.
+
+### 11.7 Updated Architecture Summary
+
+The final Stage 4 architecture consists of:
+Client Layer
+Server Layer
+Generic Service Abstraction Layer
+DAO Layer
+Database Layer
+
+Updated architecture flow:
+
+Client->Server / ClientHandler->Generic Service Layer ->DAO Layer->MySQL Database
+
+The Generic Service Layer acts as an abstraction between request handling and business processing.
+
+### 11.8 Extended Stage 4 Testing
+
+Stage 4 expanded the Stage 3 test suite to include:
+- all DAO CRUD methods
+- filtering methods
+- JSON round-trip tests
+- binary upload and retrieval tests
+- server request/response tests
+- generic service tests
+- factory routing tests
+
+Tests are organised into the following packages:
+```
+src/test/java/org/DAO_JDBC
+src/test/java/org/JsonUtil
+src/test/java/org/Services
+src/test/java/org/Server
+```
+###11.9 Binary Upload and Retrieval Testing
+Binary file handling tests verify that uploaded file bytes match retrieved file bytes.
+
+Example test flow:
+
+1. create test byte[]
+2. upload binary data
+3. retrieve binary data
+4. compare original and retrieved bytes using assertArrayEquals()
+
+This confirms that binary data is correctly preserved through:
+
+JSON serialisation
+server transfer
+database storage
+retrieval
+reconstruction
+
+### 11.10 Server Request / Response Testing
+ClientHandlerTest verifies server-side request handling.
+
+The tests simulate client requests and verify:
+
+- successful JSON responses
+- correct request routing
+- proper error handling
+- generic service execution
+- binary upload handling
+
+Example tested actions:
+
+- getAll
+- getById
+- add
+- update
+- delete
+- runService
+- uploadFile
+- getFile
+- getFileMetadata
+
+### 11.11 Coverage Threshold
+
+The IntelliJ IDEA built-in Coverage Runner was used to measure project coverage.
+
+Coverage includes:
+
+DAO layer
+JSON conversion classes
+Generic services
+Binary file handling logic
+Server request handling
+
+Coverage achieved:
+```
+>= 70%
+```
+Coverage evidence screenshot:
+```
+/reports/
+```
+### 11.12 Stage 4 Demonstration Checklist
+
+Before final demonstration, the following should be verified:
+
+- server starts successfully
+- client connects successfully
+- all CRUD operations work
+- binary file upload works
+- binary file retrieval works
+- metadata-only query works
+- disconnect request works
+- PRODUCT_REPORT service works
+- FILE_UPLOAD service works
+- JUnit tests pass
+- coverage screenshot included
+- architecture diagram updated
+
+### 12. Harvard References
+
+Fowler, M. (2003) Patterns of Enterprise Application Architecture. Boston: Addison-Wesley.
+
+Freeman, E. and Robson, E. (2021) Head First Design Patterns. 2nd edn. Sebastopol: O'Reilly Media.
+
+Oracle (2025) Java Documentation. Available at:
+https://docs.oracle.com/en/java/
+
+(Accessed: 8 May 2026).
+
+Oracle (2025) JDBC API Documentation. Available at:
+https://docs.oracle.com/javase/8/docs/technotes/guides/jdbc/
+
+(Accessed: 8 May 2026).
+
+FasterXML (2025) Jackson Databind Documentation. Available at:
+https://github.com/FasterXML/jackson-databind
+
+(Accessed: 8 May 2026).
+
+JUnit Team (2025) JUnit 5 User Guide. Available at:
+https://junit.org/junit5/docs/current/user-guide/
+
+(Accessed: 8 May 2026).
+
 
 ---

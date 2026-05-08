@@ -19,6 +19,12 @@ import java.util.Map;
 
 import java.nio.file.Paths;
 
+/**
+ * @author Aloka (primary)
+ * @author Adhira Pillai (contributor)
+ * @author Victoria (contributor)
+ **/
+
 //testing client
 public class ClientMain
 {

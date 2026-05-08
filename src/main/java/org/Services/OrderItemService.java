@@ -8,6 +8,10 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * @author Adhira Pillai (primary)
+ **/
+
 public class OrderItemService
 {
     private final OrderItemDao orderItemDao;

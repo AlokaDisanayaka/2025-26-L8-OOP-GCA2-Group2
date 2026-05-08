@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Filtering items using custom predicates business logic
  *
  *  Shows the separation between service and data access layers
+ *
+ *  @author Adhira Pillai (primary)
  */
 
 public class OrderItemServiceTest
