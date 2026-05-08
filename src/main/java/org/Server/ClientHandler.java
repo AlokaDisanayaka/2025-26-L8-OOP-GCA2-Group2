@@ -154,6 +154,27 @@ public class ClientHandler implements Runnable
             String action = request.getAction();
             String entity = request.getEntity();
 
+
+            // Stage 4: Generic service routing
+            if ("runService".equalsIgnoreCase(action))
+            {
+
+                org.GenericServices.GenericService service = org.GenericServices.GenericServiceFactory.getService(request.getServiceType());
+
+                if (!service.validate(request))
+                {
+                    return mapper.writeValueAsString(
+                            ServerResponse.error("Invalid request for service: " + request.getServiceType())
+                    );
+                }
+
+                Object result = service.execute(request);
+
+                return mapper.writeValueAsString(
+                        ServerResponse.success(service.getSuccessMessage(), result)
+                );
+            }
+
             // Stage 3=>  disconnect request
             if ("disconnect".equalsIgnoreCase(action))
             {
