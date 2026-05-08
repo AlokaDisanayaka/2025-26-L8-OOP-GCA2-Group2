@@ -95,4 +95,56 @@ public class ProductJsonUtilTest {
         assertEquals(8, product.getStockQty());
         assertTrue(product.isActive());
     }
+
+    // Tests that invalid JSON gives a RuntimeException
+    @Test
+    void productFromJson_throwsRuntimeException_whenJsonInvalid()
+    {
+        String json = "{ bad product json }";
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                ProductJsonUtil.productFromJson(json));
+
+        assertTrue(exception.getMessage().contains("Error converting JSON to Product"));
+    }
+
+    // Tests that productToJson handles a conversion error
+    @Test
+    void productToJson_throwsRuntimeException_whenProductCannotBeConverted()
+    {
+        Product badProduct = new Product(1, "Bad Product", 10.0, 5, true)
+        {
+            @Override
+            public String getProductName()
+            {
+                throw new RuntimeException("Bad product name");
+            }
+        };
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                ProductJsonUtil.productToJson(badProduct));
+
+        assertTrue(exception.getMessage().contains("Error converting Product to JSON"));
+    }
+
+    // Tests that productListToJson handles a conversion error
+    @Test
+    void productListToJson_throwsRuntimeException_whenProductListCannotBeConverted()
+    {
+        Product badProduct = new Product(1, "Bad Product", 10.0, 5, true)
+        {
+            @Override
+            public String getProductName()
+            {
+                throw new RuntimeException("Bad list product name");
+            }
+        };
+
+        List<Product> products = List.of(badProduct);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                ProductJsonUtil.productListToJson(products));
+
+        assertTrue(exception.getMessage().contains("Error converting Product list to JSON"));
+    }
 }

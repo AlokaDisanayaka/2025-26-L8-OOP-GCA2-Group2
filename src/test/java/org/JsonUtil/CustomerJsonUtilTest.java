@@ -92,4 +92,56 @@ public class CustomerJsonUtilTest {
         assertEquals("manual@email.com", customer.getEmail());
         assertEquals("0875555555", customer.getPhone());
     }
+
+    // Tests that invalid JSON gives a RuntimeException
+    @Test
+    void customerFromJson_throwsRuntimeException_whenJsonInvalid()
+    {
+        String json = "{ bad customer json }";
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                CustomerJsonUtil.customerFromJson(json));
+
+        assertTrue(exception.getMessage().contains("Error converting JSON to Customer"));
+    }
+
+    // Tests that customerToJson handles a conversion error
+    @Test
+    void customerToJson_throwsRuntimeException_whenCustomerCannotBeConverted()
+    {
+        Customer badCustomer = new Customer(1, "Bad Customer", "bad@email.com", "0871111111")
+        {
+            @Override
+            public String getName()
+            {
+                throw new RuntimeException("Bad name");
+            }
+        };
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                CustomerJsonUtil.customerToJson(badCustomer));
+
+        assertTrue(exception.getMessage().contains("Error converting Customer to JSON"));
+    }
+
+    // Tests that customerListToJson handles a conversion error
+    @Test
+    void customerListToJson_throwsRuntimeException_whenCustomerListCannotBeConverted()
+    {
+        Customer badCustomer = new Customer(1, "Bad Customer", "badlist@email.com", "0872222222")
+        {
+            @Override
+            public String getName()
+            {
+                throw new RuntimeException("Bad list name");
+            }
+        };
+
+        List<Customer> customers = List.of(badCustomer);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                CustomerJsonUtil.customerListToJson(customers));
+
+        assertTrue(exception.getMessage().contains("Error converting Customer list to JSON"));
+    }
 }
