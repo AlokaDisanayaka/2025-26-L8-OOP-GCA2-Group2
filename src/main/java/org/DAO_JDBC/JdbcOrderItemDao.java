@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author Adhira Pillai (primary)
+ **/
+
 public class JdbcOrderItemDao implements OrderItemDao
 {
     @Override

@@ -4,6 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+/**
+ * @author ALoka (primary)
+ * @author Adhira Pillai (contributor)
+ **/
+
 public class ObjectMapperProvider
 {
     private static final ObjectMapper mapper = createMapper();

@@ -13,10 +13,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * - JSON round trip: object -> JSON -> object
  * - Serialisation of a single object to JSON
  * - Serialisation of a list of objects to JSON*
+ *
+ * @author Adhira Pillai (primary)
  */
 
 public class OrderItemJsonUtilTest
 {
+    //tests full JSON round trip conversion preserves all order item fields correctly
     @Test
     void orderItem_jsonRoundTrip_preservesAllFields()
     {
@@ -41,7 +44,7 @@ public class OrderItemJsonUtilTest
         assertArrayEquals(original.getFileData(), result.getFileData());
     }
 
-    //JSON output
+    //tests that serialising a single order item produces valid JSON output containing expected fields
     @Test
     void orderItem_toJson_returnsValidJson()
     {
@@ -53,7 +56,7 @@ public class OrderItemJsonUtilTest
         assertTrue(json.contains("orderId"));
     }
 
-    //List serialisation
+    //tests that a list of order item objects is correctly converted into a JSON array
     @Test
     void orderItemList_toJson_returnsJsonArray()
     {
@@ -64,5 +67,26 @@ public class OrderItemJsonUtilTest
 
         assertNotNull(json);
         assertTrue(json.startsWith("["));
+    }
+
+    //tests that JSON serialisation and deserialisation correctly handles null file data
+    @Test
+    void orderItem_json_handlesNullFileData()
+    {
+        OrderItem item = new OrderItem(1, 1, 2, 10.0);
+        item.setFileData(null);
+
+        String json = OrderItemJsonUtil.orderItemToJson(item);
+        OrderItem result = OrderItemJsonUtil.orderItemFromJson(json);
+
+        assertNull(result.getFileData());
+    }
+
+    //tests that serialising an empty list of order items returns an empty JSON array
+    @Test
+    void orderItemList_toJson_emptyList_returnsEmptyArray()
+    {
+        String json = OrderItemJsonUtil.orderItemListToJson(List.of());
+        assertEquals("[]", json);
     }
 }

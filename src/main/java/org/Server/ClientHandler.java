@@ -35,6 +35,12 @@ import java.util.Optional;
 
 // Handles one connected client and runs on its own thread.
 
+/**
+ * @author Aloka (primary)
+ * @author Adhira Pillai (contributor)
+ * @author Victoria (contributor)
+ **/
+
 public class ClientHandler implements Runnable
 {
     private final Socket clientSocket;
@@ -148,11 +154,32 @@ public class ClientHandler implements Runnable
     }
 
     // the method handles one request and returns a JSON response string.
-    private String handleRequest(ClientRequest request) throws Exception {
+    public String handleRequest(ClientRequest request) throws Exception {
         try
         {
             String action = request.getAction();
             String entity = request.getEntity();
+
+
+            // Stage 4: Generic service routing
+            if ("runService".equalsIgnoreCase(action))
+            {
+
+                org.GenericServices.GenericService service = org.GenericServices.GenericServiceFactory.getService(request.getServiceType());
+
+                if (!service.validate(request))
+                {
+                    return mapper.writeValueAsString(
+                            ServerResponse.error("Invalid request for service: " + request.getServiceType())
+                    );
+                }
+
+                Object result = service.execute(request);
+
+                return mapper.writeValueAsString(
+                        ServerResponse.success(service.getSuccessMessage(), result)
+                );
+            }
 
             // Stage 3=>  disconnect request
             if ("disconnect".equalsIgnoreCase(action))

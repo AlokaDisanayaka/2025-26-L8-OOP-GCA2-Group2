@@ -5,6 +5,9 @@ import org.DTO.OrderItem;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author Adhira Pillai (primary)
+ **/
 public interface OrderItemDao
 {
     List<OrderItem> getAllOrderItems();

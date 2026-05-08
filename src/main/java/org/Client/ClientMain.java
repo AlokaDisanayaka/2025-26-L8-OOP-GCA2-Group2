@@ -19,6 +19,12 @@ import java.util.Map;
 
 import java.nio.file.Paths;
 
+/**
+ * @author Aloka (primary)
+ * @author Adhira Pillai (contributor)
+ * @author Victoria (contributor)
+ **/
+
 //testing client
 public class ClientMain
 {
@@ -27,6 +33,53 @@ public class ClientMain
         ObjectMapper mapper = ObjectMapperProvider.getMapper();
         try
         {
+            System.out.println("\nSTAGE 4: PRODUCT REPORT SERVICE ........");
+
+            sendRequest(new ClientRequest(
+                    "runService",
+                    "service",
+                    null,
+                    null,
+                    "PRODUCT_REPORT"
+            ));
+
+            System.out.println("\nSTAGE 4: FILE UPLOAD SERVICE........");
+
+            try
+            {
+                Path uploadPath = Paths.get("test_files/product.jpg");
+                byte[] uploadBytes = Files.readAllBytes(uploadPath);
+
+                Product uploadProduct = new Product();
+
+                uploadProduct.setProductName("Temp Product");
+                uploadProduct.setUnitPrice(1.0);
+                uploadProduct.setStockQty(1);
+                uploadProduct.setActive(true);
+
+                uploadProduct.setFileName(uploadPath.getFileName().toString());
+                uploadProduct.setContentType("image/jpeg");
+                uploadProduct.setFileSize(uploadBytes.length);
+                uploadProduct.setFileData(uploadBytes);
+
+                String stage4ProductJson = mapper.writeValueAsString(uploadProduct);
+
+                sendRequest(new ClientRequest(
+                        "runService",
+                        "service",
+                        1,
+                        stage4ProductJson,
+                        "FILE_UPLOAD"
+                ));
+            }
+            catch (Exception e)
+            {
+                System.out.println("Stage 4 file upload service test failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+
+
             // Test different requests one by one
             //CUSTOMER
             //-------------------------------------------------------------
@@ -210,7 +263,6 @@ public class ClientMain
 
             // testing filter reviews by rating
             sendRequest(new ClientRequest("filterByRating", "review", 5, null));
-
 
           disconnect();
         }
