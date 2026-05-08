@@ -2,6 +2,7 @@ package org.Server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.DTO.Orders;
+import org.DTO.Product;
 import org.Interface.ClientRequest;
 import org.Interface.ObjectMapperProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -251,5 +252,70 @@ public class ClientHandlerTest
         String response = handler.handleRequest(request);
 
         assertTrue(response.contains("fileData") || response.contains("error"));
+    }
+
+    //tests that getting all customers returns a success response
+    @Test
+    void handleRequest_returnsSuccess_whenGetAllCustomersRequestSent() throws Exception
+    {
+        ClientRequest request = new ClientRequest("getAll", "customer", null, null);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("Customers retrieved successfully"));
+        assertTrue(response.contains("success"));
+    }
+
+    //tests that getting one product by id returns a success response
+    @Test
+    void handleRequest_returnsSuccess_whenGetProductByIdRequestSent() throws Exception
+    {
+        Product product = new Product("Stage 4 Product " + System.nanoTime(), 10.0, 5, true);
+        String productJson = mapper.writeValueAsString(product);
+
+        ClientRequest addRequest = new ClientRequest("add", "product", null, productJson);
+        String addResponse = handler.handleRequest(addRequest);
+        int productId = mapper.readTree(addResponse).get("data").get("productId").asInt();
+
+        ClientRequest request = new ClientRequest("getById", "product", productId, null);
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("Product found"));
+        assertTrue(response.contains("success"));
+    }
+
+    //tests that the product report service returns a success response
+    @Test
+    void handleRequest_returnsSuccess_whenRunProductReportServiceRequestSent() throws Exception
+    {
+        ClientRequest request = new ClientRequest("runService", null, null, null, "PRODUCT_REPORT");
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("Product report generated successfully"));
+        assertTrue(response.contains("success"));
+    }
+
+    //tests that the file upload service returns a success response
+    @Test
+    void handleRequest_returnsSuccess_whenFileUploadServiceRequestSent() throws Exception
+    {
+        Product product = new Product("Stage 4 File Product " + System.nanoTime(), 20.0, 10, true);
+        String productJson = mapper.writeValueAsString(product);
+
+        ClientRequest addRequest = new ClientRequest("add", "product", null, productJson);
+        String addResponse = handler.handleRequest(addRequest);
+        int productId = mapper.readTree(addResponse).get("data").get("productId").asInt();
+
+        byte[] fileData = "Hello Product".getBytes();
+        product.setFileName("hello-product.txt");
+        product.setContentType("text/plain");
+        product.setFileSize(fileData.length);
+        product.setFileData(fileData);
+
+        String fileJson = mapper.writeValueAsString(product);
+        ClientRequest request = new ClientRequest("runService", null, productId, fileJson, "FILE_UPLOAD");
+        String response = handler.handleRequest(request);
+
+        assertTrue(response.contains("File uploaded"));
+        assertTrue(response.contains("success"));
     }
 }
