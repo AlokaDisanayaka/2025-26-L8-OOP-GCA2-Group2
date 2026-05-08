@@ -736,7 +736,7 @@ src/test/java/org/JsonUtil
 src/test/java/org/Services
 src/test/java/org/Server
 ```
-###11.9 Binary Upload and Retrieval Testing
+### 11.9 Binary Upload and Retrieval Testing
 Binary file handling tests verify that uploaded file bytes match retrieved file bytes.
 
 Example test flow:
@@ -793,9 +793,9 @@ Coverage achieved:
 ```
 >= 70%
 ```
-Coverage evidence screenshot:
+Coverage evidence screenshots:
 ```
-/reports/
+/docs/coverage
 ```
 ### 11.12 Stage 4 Demonstration Checklist
 
@@ -813,6 +813,50 @@ Before final demonstration, the following should be verified:
 - JUnit tests pass
 - coverage screenshot included
 - architecture diagram updated
+
+### Screencast Links
+Orders and OrderItem:  
+- URL: https://youtu.be/l4CYrPf4IdY
+
+Customers and Products:  
+- URL:
+  
+Review:  
+- URL:
+
+## 11.13 Contribution Matrix 
+
+| Major task | Primary author | Contributor / reviewer | Notes |
+| :- | :- | :- | :- |
+| Domain proposal email (150–200 words) + entity list for approval | Aloka, Adhira | N/A | Drafted + refined before sending |
+| Repo setup (private repo, collaborators, branch plan stage1–stage4) | Aloka | Adhira | Created branches + README skeleton |
+| `mysqlSetup.sql` schema + seed data (10+ rows per table) | Aloka | Adhira, Victoria | Re-runnable from scratch |
+| DTO/entity modelling + validation rules (trim/blank/range checks) | Aloka | Adhira, Victoria | Included int/double/string fields |
+| DAO interfaces (XxxDao) for all entities | Aloka | Adhira, Victoria | Service depends on interfaces only |
+| JDBC DAO implementation: `getAll` + `getById` using `Optional<T>` | Aloka | Adhira, Victoria | PreparedStatements throughout |
+| JDBC DAO implementation: `insert` returning generated keys | Aloka | Adhira, Victoria | Verified `getGeneratedKeys()` |
+| JDBC DAO implementation: `update` + `deleteById` | Aloka | Adhira, Victoria | Consistent return semantics |
+| Predicate filtering API (`findByFilter(Predicate<T>)`) | Aloka, Adhira, Victoria | N/A | Lambda-based filtering |
+| JSON conversion (toJson/fromJson/listToJson) per entity | Aloka | Adhira, Victoria | Round-trip verified |
+| Architecture diagram (Mermaid) + annotated tier explanation | Adhira | N/A | Updated as architecture evolved |
+| Multithreaded server (`ExecutorService`, client handler per connection) | Aloka | Adhira, Victoria | Clean shutdown + logging |
+| `ServerResponse<T>` wrapper + consistent response mapping | Aloka | Adhira, Victoria | No raw types |
+| Protocol documentation in README (all request types + payloads) | Aloka, Adhira | N/A | Kept current per stage |
+| Client features: display all + display by id | Aloka, Adhira, Victoria | N/A | Implemented for owned entity |
+| Client features: insert/update/delete over sockets | Aloka, Adhira, Victoria | N/A | Handles failures gracefully |
+| Error handling: structured failures (no stack traces to client) | Aloka | Adhira, Victoria | Includes validation + DB errors |
+| Binary schema extension (BLOB + metadata columns) | Adhira | Aloka, Victoria | Updated `mysqlSetup.sql` |
+| Binary upload (Base64 encode/decode + DB storage) | Adhira | Aloka, Victoria | Stored bytes + metadata |
+| Binary retrieval (reconstruct file on client) | Adhira | Aloka, Victoria | Verified bytes match |
+| Metadata-only query (no BLOB fetch) | Adhira | Aloka, Victoria | Separate DAO method |
+| Disconnect protocol (`DISCONNECT`) + cleanup | Adhira | N/A | Releases thread cleanly |
+| Stage 3 core tests (DAO read, insert+id, JSON round-trip) | Adhira | Aloka, Victoria | 3+ tests each |
+| Stage 4 extended tests (server scenario + binary scenario + full DAO) | Adhira | Aloka, Victoria | Added 3+ more each |
+| Coverage evidence screenshot `/docs/coverage` | Aloka, Adhira, Victoria | N/A | IntelliJ coverage runner |
+| Screencast (8–10 min): demo + design iterations | Aloka, Adhira, Victoria | N/A | Script + recording + export |
+| Harvard references + AI usage declaration | Aloka, Adhira, Victoria | N/A | All sources cited |
+| Final README polish (run steps, protocol, testing, evidence links) | Aloka, Adhira | N/A | Consistent formatting |
+---
 
 ### 12. Harvard References
 
