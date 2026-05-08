@@ -175,6 +175,12 @@ org
  │     OrderItem.java
  │     Review.java
  │
+ |── GenericServices
+ │     FileUploadSerrvice.java
+ │     GenericService.java
+ │     GenericServiceFactory.java
+ │     ProductReportService.java
+ |
  ├── DAO
  │     CustomerDao.java
  │     ProductDao.java
@@ -627,11 +633,10 @@ The FileUploadService handles binary product file uploads.
 
 Responsibilities:
 
-validates upload requests
-deserialises Product JSON
-uploads binary file data
-stores metadata and BLOB data using DAO methods
-
+- validates upload requests
+- deserialises Product JSON
+- uploads binary file data
+- stores metadata and BLOB data using DAO methods
 This service demonstrates binary file handling through the generic service architecture.
 
 ProductReportService
@@ -639,10 +644,10 @@ The ProductReportService generates simple product statistics.
 
 Responsibilities:
 
-retrieves all products
-counts active products
-counts low stock products
-returns a formatted report string
+- retrieves all products
+- counts active products
+- counts low stock products
+- returns a formatted report string
 
 This service demonstrates domain-specific business processing through the generic service architecture.
 
@@ -709,15 +714,7 @@ Database Layer
 
 Updated architecture flow:
 
-Client
-   ↓
-Server / ClientHandler
-   ↓
-Generic Service Layer
-   ↓
-DAO Layer
-   ↓
-MySQL Database
+Client->Server / ClientHandler->Generic Service Layer ->DAO Layer->MySQL Database
 
 The Generic Service Layer acts as an abstraction between request handling and business processing.
 
@@ -762,23 +759,23 @@ ClientHandlerTest verifies server-side request handling.
 
 The tests simulate client requests and verify:
 
-successful JSON responses
-correct request routing
-proper error handling
-generic service execution
-binary upload handling
+- successful JSON responses
+- correct request routing
+- proper error handling
+- generic service execution
+- binary upload handling
 
 Example tested actions:
 
-getAll
-getById
-add
-update
-delete
-runService
-uploadFile
-getFile
-getFileMetadata
+- getAll
+- getById
+- add
+- update
+- delete
+- runService
+- uploadFile
+- getFile
+- getFileMetadata
 
 ### 11.11 Coverage Threshold
 
