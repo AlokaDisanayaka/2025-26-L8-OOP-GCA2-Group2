@@ -736,7 +736,7 @@ src/test/java/org/JsonUtil
 src/test/java/org/Services
 src/test/java/org/Server
 ```
-###11.9 Binary Upload and Retrieval Testing
+### 11.9 Binary Upload and Retrieval Testing
 Binary file handling tests verify that uploaded file bytes match retrieved file bytes.
 
 Example test flow:
@@ -793,9 +793,9 @@ Coverage achieved:
 ```
 >= 70%
 ```
-Coverage evidence screenshot:
+Coverage evidence screenshots:
 ```
-/reports/
+/docs/coverage
 ```
 ### 11.12 Stage 4 Demonstration Checklist
 
@@ -813,6 +813,16 @@ Before final demonstration, the following should be verified:
 - JUnit tests pass
 - coverage screenshot included
 - architecture diagram updated
+
+### Screencast Links
+Orders and OrderItem:  
+- URL: https://youtu.be/l4CYrPf4IdY
+
+Customers and Products:  
+- URL:
+  
+Review:  
+- URL:
 
 ## 11.13 Contribution Matrix 
 
