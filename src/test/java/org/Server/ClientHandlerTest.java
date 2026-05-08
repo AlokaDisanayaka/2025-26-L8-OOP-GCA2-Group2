@@ -15,6 +15,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @author Adhira Pillai (primary)
+ * @author Aloka (contributor)
+ **/
+
 public class ClientHandlerTest
 {
     private ClientHandler handler;

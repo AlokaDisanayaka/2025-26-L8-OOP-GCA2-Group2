@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Delete operation to confirm records are removed
  *
  *  Using @BeforeEach makes sure each test runs independently to create a clean DAO instance
+ *
+ *  @author Adhira Pillai (primary)
  */
 
 public class JdbcOrdersDaoTest

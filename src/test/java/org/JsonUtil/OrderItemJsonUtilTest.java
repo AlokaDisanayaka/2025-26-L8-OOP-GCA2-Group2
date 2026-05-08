@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * - JSON round trip: object -> JSON -> object
  * - Serialisation of a single object to JSON
  * - Serialisation of a list of objects to JSON*
+ *
+ * @author Adhira Pillai (primary)
  */
 
 public class OrderItemJsonUtilTest
