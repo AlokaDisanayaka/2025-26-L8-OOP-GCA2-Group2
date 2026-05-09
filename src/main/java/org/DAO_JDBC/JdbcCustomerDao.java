@@ -11,6 +11,9 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 //Implements the CustomerDao interface using JDBC and SQL with PreparedStatements
+/**
+ * @author Aloka (primary)
+ */
 public class JdbcCustomerDao implements CustomerDao {
 
     @Override
