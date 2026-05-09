@@ -6,6 +6,9 @@ import org.Interface.ClientRequest;
 
 import java.util.List;
 
+/**
+ * @author Aloka (primary)
+ */
 public class ProductReportService implements GenericService {
 
     private JdbcProductDao productDao;

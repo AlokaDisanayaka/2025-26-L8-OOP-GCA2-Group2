@@ -3,6 +3,9 @@ import org.DAO_JDBC.JdbcProductDao;
 import org.DTO.Product;
 import org.Interface.ClientRequest;
 
+/**
+ * @author Aloka (primary)
+ */
 public class FileUploadService implements GenericService {
 
     private JdbcProductDao productDao;

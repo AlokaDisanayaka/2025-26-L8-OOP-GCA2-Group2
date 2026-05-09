@@ -12,6 +12,9 @@ import java.util.function.Predicate;
 /**
  * JDBC implementation of ProductDao
  */
+/**
+ * @author Aloka (primary)
+ */
 public class JdbcProductDao implements ProductDao {
 
     @Override

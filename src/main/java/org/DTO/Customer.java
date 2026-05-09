@@ -1,5 +1,8 @@
 package org.DTO;
 //Represents a Customer object and stores validated customer data (id, name, email, phone)
+/**
+ * @author Aloka (primary)
+ */
 public class Customer {
     private int customerId;
     private String name;

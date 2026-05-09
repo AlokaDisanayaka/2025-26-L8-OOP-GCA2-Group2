@@ -2,6 +2,9 @@ package org.GenericServices;
 
 import org.Interface.ClientRequest;
 
+/**
+ * @author Aloka (primary)
+ */
 public interface GenericService {
 
     // Checks whether the request has valid data

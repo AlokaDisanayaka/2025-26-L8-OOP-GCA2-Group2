@@ -6,6 +6,10 @@ package org.Interface;
  * id       - used for getById / delete / update
   jsonData -JSON version of CustomerProd,uct for insert/update
  */
+/**
+ * @author ALoka (primary)
+ **/
+
 public class ClientRequest {
 
     private String action;

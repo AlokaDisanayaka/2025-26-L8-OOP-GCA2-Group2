@@ -10,6 +10,9 @@ import java.util.function.Predicate;
  * Service layer depends ONLY on ProductDao interface.
  * Does not know about JDBC implementation. x
  */
+/**
+ * @author Aloka (primary)
+ */
 public class ProductService {
 
     private final ProductDao productDao;

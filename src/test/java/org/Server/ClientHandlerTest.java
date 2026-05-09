@@ -21,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Aloka (contributor)
  **/
 
+/**
+ * @author Aloka (primary)
+ */
 public class ClientHandlerTest
 {
     private ClientHandler handler;

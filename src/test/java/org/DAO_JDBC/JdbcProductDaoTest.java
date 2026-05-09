@@ -10,6 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 //Tests for Product DAO
 
+/**
+ * @author Aloka (primary)
+ */
 public class JdbcProductDaoTest {
 
     private JdbcProductDao dao;

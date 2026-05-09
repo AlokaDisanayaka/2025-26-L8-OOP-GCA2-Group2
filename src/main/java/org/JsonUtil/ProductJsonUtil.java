@@ -8,6 +8,9 @@ import java.util.List;
 
 
  // Utility class used to convert Product objects to and from JSON using Jackson.
+/**
+ * @author Aloka (primary)
+ */
 public class ProductJsonUtil {
 
     // ObjectMapper is the main Jackson class for JSON conversion

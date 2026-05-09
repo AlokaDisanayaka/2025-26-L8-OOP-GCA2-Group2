@@ -8,6 +8,9 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 //Acts as a middle layer between the app and DAO; calls DAO methods without knowing how the database works
+/**
+ * @author Aloka (primary)
+ */
 public class CustomerService {
 
     private final CustomerDao customerDao;

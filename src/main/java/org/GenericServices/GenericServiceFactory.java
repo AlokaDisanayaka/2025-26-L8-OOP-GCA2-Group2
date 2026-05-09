@@ -3,6 +3,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * @author Aloka (primary)
+ */
 public class GenericServiceFactory {
 
     private static final Map<String, Supplier<GenericService>> services = new HashMap<>();

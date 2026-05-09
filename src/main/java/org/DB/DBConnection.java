@@ -1,4 +1,9 @@
 package org.DB;
+/**
+ * @author ALoka (primary)
+ * @author Adhira Pillai (contributor)
+ **/
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;

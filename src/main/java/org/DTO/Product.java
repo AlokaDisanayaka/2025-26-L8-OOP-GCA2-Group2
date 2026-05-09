@@ -1,5 +1,8 @@
 package org.DTO;
 
+/**
+ * @author Aloka (primary)
+ */
 public class Product {
 
     private int productId;

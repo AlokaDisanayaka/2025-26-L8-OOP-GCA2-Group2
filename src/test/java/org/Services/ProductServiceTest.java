@@ -9,6 +9,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
  // Tests for ProductService
+/**
+ * @author Aloka (primary)
+ */
 public class ProductServiceTest {
 
     private ProductService service;
